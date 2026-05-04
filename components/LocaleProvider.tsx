@@ -19,21 +19,32 @@ interface LocaleContextValue {
   locale: NandutiLocale;
   setLocale: (locale: NandutiLocale) => void;
   t: (key: string) => string;
+  tArr: (key: string) => string[];
 }
 
 const LocaleContext = createContext<LocaleContextValue | null>(null);
 
-function resolve(tree: StringsTree, key: string): string {
+function resolveRaw(tree: StringsTree, key: string): unknown {
   const parts = key.split('.');
   let cursor: unknown = tree;
   for (const part of parts) {
     if (cursor && typeof cursor === 'object' && part in (cursor as Record<string, unknown>)) {
       cursor = (cursor as Record<string, unknown>)[part];
     } else {
-      return key;
+      return undefined;
     }
   }
-  return typeof cursor === 'string' ? cursor : key;
+  return cursor;
+}
+
+function resolve(tree: StringsTree, key: string): string {
+  const v = resolveRaw(tree, key);
+  return typeof v === 'string' ? v : key;
+}
+
+function resolveArr(tree: StringsTree, key: string): string[] {
+  const v = resolveRaw(tree, key);
+  return Array.isArray(v) ? v.filter((x): x is string => typeof x === 'string') : [];
 }
 
 export function NandutiLocaleProvider({
@@ -61,6 +72,7 @@ export function NandutiLocaleProvider({
       locale,
       setLocale,
       t: (key: string) => resolve(dict, key),
+      tArr: (key: string) => resolveArr(dict, key),
     };
   }, [locale, setLocale]);
 

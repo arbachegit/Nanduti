@@ -14,7 +14,7 @@ interface Msg {
 }
 
 export default function ChatCenter() {
-  const { t, locale } = useNandutiLocale();
+  const { t, tArr, locale } = useNandutiLocale();
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState('');
   const [streaming, setStreaming] = useState(false);
@@ -120,9 +120,9 @@ export default function ChatCenter() {
           <div className="cc__sugg">
             <span className="nd-eyebrow">{t('chat.suggested')}</span>
             <ul>
-              {(t('chat.examples') as unknown as string[]).slice ? (t('chat.examples') as unknown as string[]).slice(0, 5).map((s) => (
+              {tArr('chat.examples').slice(0, 5).map((s) => (
                 <li key={s}><button type="button" className="nd-btn" onClick={() => send(s)}>{s}</button></li>
-              )) : null}
+              ))}
             </ul>
           </div>
         ) : null}
