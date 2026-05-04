@@ -1,0 +1,161 @@
+{
+  "app": { "name": "Ñandutí", "tagline": "Ne Paraguái, peteĩ ñomongetápe." },
+  "hero": {
+    "title": "Ñandutí",
+    "subtitle": "Ne Paraguái, peteĩ ñomongetápe.",
+    "lead": "Eporandu kastelláno, avañe'ẽ térã jopara-pe. Ñanduti nepytyvõ tembiapópe, tesãi, mbo'ehao, viru ñembohasa.",
+    "cta": "Eñepyrũ",
+    "badge": "JEHECHAUKA · MITIC + IconsAI"
+  },
+  "lang": { "label": "Ñe'ẽ", "es": "Kastelláno", "gn": "Avañe'ẽ", "jopara": "Jopara" },
+  "phase": { "label": "Mockup", "next": "Paraguái Tetãygua Ruvichápe" },
+  "onboarding": {
+    "step1_title": "Mba'éichapa, paraguái tetãygua",
+    "step1_body": "Ñandutí ha'e tetã rape IA-pe. Ojejapo ndive, ñepytyvõ ne marandu rehe.",
+    "step2_title": "Identidad Electrónica MITIC",
+    "step2_body": "Ñañepyrũ ne kuatia electrónica ndive. Tembiapo, tesãi, mbo'ehao ha viru.",
+    "step3_title": "Eñe'ẽ térã ehai",
+    "step3_body": "Eñe'ẽ Ñandutí ndive kastelláno, avañe'ẽ térã jopara-pe. Modo discreto oĩ.",
+    "next": "Tenondévo",
+    "start": "Eike",
+    "skip": "Eipea"
+  },
+  "auth": {
+    "title": "Identidad Electrónica",
+    "subtitle": "Eike ne kuatia ndive",
+    "cedula_label": "Kuatia paraguái",
+    "cedula_placeholder": "1234567",
+    "otp_label": "Mba'e papyha",
+    "otp_placeholder": "123456",
+    "otp_hint": "Jehechauka: mba'e papyha 123456",
+    "submit": "Eike",
+    "via_mitic": "Térã paraguay.gov.py-pe",
+    "demo_note": "Mockup. Ndoseúi ko navegador-gui.",
+    "invalid_cedula": "Kuatia ndoikói",
+    "invalid_otp": "Mba'e papyha vai"
+  },
+  "chat": {
+    "placeholder": "Ehai térã epoko micrófono-pe…",
+    "send": "Mondo",
+    "voice_start": "Epoko eñe'ẽ haguã",
+    "voice_recording": "Ojegrabá…",
+    "thinking": "Oje'apesa…",
+    "error": "Mba'eve ndoikói. Ñañepyrũjeýta?",
+    "greeting": "Mba'éichapa, María. Mba'épa nepytyvõ?",
+    "suggested": "Eha'arõ:",
+    "examples": ["Mboýpa areko?", "Renovar cédula", "Sofía boletín", "Sãso oĩháicha", "Denuncia"]
+  },
+  "sidebar": {
+    "title": "Tembiapokuéra",
+    "wallet": "Ñe'enguaa",
+    "gov": "Tembiapo",
+    "health": "Tesãi",
+    "edu": "Mbo'ehao",
+    "crypto": "Kuatia USDC",
+    "info": "Marandu",
+    "alerts": "Sãso",
+    "police": "Denuncia",
+    "docs": "Kuatia"
+  },
+  "wallet": {
+    "title": "Ñe'enguaa",
+    "balance_pyg": "Viru paraguái",
+    "balance_usdc": "USDC",
+    "tab_transfer": "Mbohasa",
+    "tab_qr": "QR Hub",
+    "tab_history": "Tembiasakue",
+    "to_label": "Avápe",
+    "amount_label": "Mboy (Gs.)",
+    "concept_label": "Mba'erã",
+    "send_btn": "Mbohasa",
+    "scan_qr": "QR ehecha",
+    "success": "Oĩma, Gs. {amount} oñembou",
+    "error_balance": "Viru ndahetái",
+    "card_label": "Mastercard ··· {last4}"
+  },
+  "gov": {
+    "title": "Tetã rembiapokuéra",
+    "search_placeholder": "Eheka tembiapo…",
+    "duration": "{min} min",
+    "free": "Sin sambyhy",
+    "digital": "100% digital",
+    "presencial": "Presencial",
+    "book": "Eipichy turno",
+    "ruc_lookup": "RUC porandu"
+  },
+  "health": {
+    "title": "Tesãi",
+    "tab_triage": "Triagem",
+    "tab_book": "Turno USF",
+    "tab_vaccine": "Vacuna óga",
+    "symptoms_label": "Ere chéve mba'épa reñeñandu",
+    "ask": "Porandu",
+    "level_verde": "Mbegue",
+    "level_amarillo": "Eñatende",
+    "level_rojo": "Sãso",
+    "emergency_call": "Ehenói 911",
+    "linea_155": "Ehenói 155",
+    "triage_disclaimer": "Ko jehechauka marandurã ñoite. NDOJOJÁI pohãnohára ndive."
+  },
+  "edu": {
+    "title": "Sofía mbo'ehao",
+    "tab_report": "Boletín",
+    "tab_enroll": "Matrícula",
+    "tab_tutor": "Tutor IA",
+    "subject_score": "Pa'ũ",
+    "attendance": "Oime jave",
+    "tutor_topic_label": "Mba'épa reikuaase ko ára?",
+    "tutor_ask": "Eipuka chéve"
+  },
+  "crypto": {
+    "title": "Kuatia USDC",
+    "card_label": "Mastercard ··· {last4}",
+    "balance": "Viru",
+    "rate": "1 USDC = Gs. {rate}",
+    "topup": "Embojuruja",
+    "topup_label": "Mboy Gs.",
+    "lock": "Embotĩ kuatia",
+    "unlock": "Embojuruja",
+    "disclaimer": "Stablecoin USDC ha'e mba'erepy virtual jehechauka. Marco regulatorio paraguáipe oĩ."
+  },
+  "info": {
+    "title": "Tetã marandu",
+    "weekly_btn": "Resumen IA semanal",
+    "tab_feed": "Feed",
+    "tab_summary": "Resumen"
+  },
+  "alerts": {
+    "title": "Sãso geo",
+    "subscribe": "Eheñói",
+    "subscribed": "Eheñoýma",
+    "category_clima": "Ára",
+    "category_seguridad": "Seguridad",
+    "category_salud": "Tesãi",
+    "category_transito": "Tape",
+    "category_apagon": "Tata oguévo"
+  },
+  "police": {
+    "title": "Denuncia online",
+    "panic_btn": "PÁNICO BOTÓN",
+    "panic_holding": "Oñemondo {sec}s — epoko ejei haguã",
+    "deam_label": "DEAM aguĩ",
+    "discrete": "Modo discreto",
+    "discrete_intro": "Reikotevẽ remokañy: epoko modo discreto. Osẽ calculadora-pe. Eju jey haguã: 7 epoko display-pe.",
+    "complaint_type": "Mba'éichagua",
+    "complaint_body": "Ere mba'épa oiko",
+    "submit": "Mondo denuncia",
+    "submitted": "Ojeguereko. Ehenói 911 ndoroavýi ramo.",
+    "hotlines_title": "Línea oĩva"
+  },
+  "docs": {
+    "title": "Kuatia digital",
+    "share": "Embohasa",
+    "audit_btn": "Avápa ohecha che marandu?",
+    "audit_title": "Audit trail",
+    "audit_empty": "Avave ndohechaiete ne marandu 30 ára-pe.",
+    "agency": "Tetã rape",
+    "action": "Mba'apo",
+    "reason": "Mba'erã",
+    "ts": "Ára"
+  }
+}

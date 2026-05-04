@@ -1,0 +1,161 @@
+{
+  "app": { "name": "Ñandutí", "tagline": "Tu Paraguay, en una conversación." },
+  "hero": {
+    "title": "Ñandutí",
+    "subtitle": "Tu Paraguay, en una conversación.",
+    "lead": "Pedile en castellano, guaraní o jopará. La IA te ayuda con trámites, salud, educación, transferencias y más.",
+    "cta": "Empezar",
+    "badge": "DEMO · MITIC + IconsAI"
+  },
+  "lang": { "label": "Idioma", "es": "Español", "gn": "Guaraní", "jopara": "Jopará" },
+  "phase": { "label": "Mockup ejecutivo", "next": "Para Presidencia del Paraguay" },
+  "onboarding": {
+    "step1_title": "Mba'éichapa, ciudadano paraguayo",
+    "step1_body": "Ñandutí es la red de servicios IA-first del Estado paraguayo. Hecha contigo, con respeto a tus datos.",
+    "step2_title": "Identidad Electrónica MITIC",
+    "step2_body": "Iniciamos con tu Identidad Electrónica. Acceso a trámites, salud, escuela y billetera. Tu cédula, tu privacidad.",
+    "step3_title": "Voz, texto, lo que prefieras",
+    "step3_body": "Hablale a Ñandutí en español, guaraní o jopará. Modo discreto disponible si necesitás privacidad.",
+    "next": "Siguiente",
+    "start": "Iniciar sesión",
+    "skip": "Saltar"
+  },
+  "auth": {
+    "title": "Identidad Electrónica",
+    "subtitle": "Iniciá sesión con tu cédula del Paraguay",
+    "cedula_label": "Cédula de Identidad",
+    "cedula_placeholder": "1234567",
+    "otp_label": "Código de un solo uso",
+    "otp_placeholder": "123456",
+    "otp_hint": "Demo: el código es 123456",
+    "submit": "Ingresar",
+    "via_mitic": "O con paraguay.gov.py",
+    "demo_note": "Demo mockup. CIC y OTP no salen del navegador.",
+    "invalid_cedula": "Cédula inválida",
+    "invalid_otp": "Código incorrecto"
+  },
+  "chat": {
+    "placeholder": "Escribí o tocá el micrófono…",
+    "send": "Enviar",
+    "voice_start": "Tocá para hablar",
+    "voice_recording": "Grabando…",
+    "thinking": "Pensando…",
+    "error": "Algo no anduvo bien. ¿Probamos de nuevo?",
+    "greeting": "Mba'éichapa, María. ¿En qué te ayudo hoy?",
+    "suggested": "Probá:",
+    "examples": ["¿Cuánto tengo?", "Renovar cédula", "Boletín de Sofía", "Alertas cerca", "Denuncia online"]
+  },
+  "sidebar": {
+    "title": "Servicios",
+    "wallet": "Billetera",
+    "gov": "Trámites",
+    "health": "Salud",
+    "edu": "Educación",
+    "crypto": "Tarjeta USDC",
+    "info": "Informativos",
+    "alerts": "Alertas",
+    "police": "Denuncia",
+    "docs": "Documentos"
+  },
+  "wallet": {
+    "title": "Billetera",
+    "balance_pyg": "Saldo en guaraníes",
+    "balance_usdc": "USDC",
+    "tab_transfer": "Transferir",
+    "tab_qr": "QR Hub",
+    "tab_history": "Historial",
+    "to_label": "Destinatario",
+    "amount_label": "Monto (Gs.)",
+    "concept_label": "Concepto",
+    "send_btn": "Transferir",
+    "scan_qr": "Escanear QR",
+    "success": "Listo, Gs. {amount} enviados",
+    "error_balance": "Saldo insuficiente",
+    "card_label": "Mastercard ··· {last4}"
+  },
+  "gov": {
+    "title": "Trámites del Estado",
+    "search_placeholder": "Buscá un trámite…",
+    "duration": "{min} min",
+    "free": "Gratis",
+    "digital": "100% digital",
+    "presencial": "Presencial",
+    "book": "Reservar turno",
+    "ruc_lookup": "Consultar RUC"
+  },
+  "health": {
+    "title": "Salud",
+    "tab_triage": "Triagem",
+    "tab_book": "Turno USF",
+    "tab_vaccine": "Vacunas familia",
+    "symptoms_label": "Contame qué sentís",
+    "ask": "Consultar",
+    "level_verde": "Leve",
+    "level_amarillo": "Atención",
+    "level_rojo": "Emergencia",
+    "emergency_call": "Llamar 911",
+    "linea_155": "Llamar Línea 155",
+    "triage_disclaimer": "Esta orientación es informativa. NO sustituye atención médica profesional."
+  },
+  "edu": {
+    "title": "Escuela de Sofía",
+    "tab_report": "Boletín",
+    "tab_enroll": "Matrícula",
+    "tab_tutor": "Tutor IA",
+    "subject_score": "Nota",
+    "attendance": "Asistencia",
+    "tutor_topic_label": "¿Qué quieres aprender hoy?",
+    "tutor_ask": "Explicame"
+  },
+  "crypto": {
+    "title": "Tarjeta USDC",
+    "card_label": "Mastercard ··· {last4}",
+    "balance": "Saldo",
+    "rate": "1 USDC = Gs. {rate}",
+    "topup": "Recargar",
+    "topup_label": "Monto en Gs.",
+    "lock": "Bloquear tarjeta",
+    "unlock": "Desbloquear",
+    "disclaimer": "USDC es activo virtual experimental. Sujeto al marco regulatorio paraguayo en formación."
+  },
+  "info": {
+    "title": "Informativos del Estado",
+    "weekly_btn": "Resumen IA semanal",
+    "tab_feed": "Feed",
+    "tab_summary": "Resumen IA"
+  },
+  "alerts": {
+    "title": "Alertas geo",
+    "subscribe": "Subscribirme",
+    "subscribed": "Subscripto",
+    "category_clima": "Clima",
+    "category_seguridad": "Seguridad",
+    "category_salud": "Salud",
+    "category_transito": "Tránsito",
+    "category_apagon": "Apagón"
+  },
+  "police": {
+    "title": "Denuncia online",
+    "panic_btn": "BOTÓN DE PÁNICO",
+    "panic_holding": "Despachando en {sec}s — tocá para cancelar",
+    "deam_label": "DEAM más cercana",
+    "discrete": "Modo discreto",
+    "discrete_intro": "Si necesitás esconder esta pantalla rápido, activá el modo discreto. Sale a una calculadora. Para volver: 7 toques en el display.",
+    "complaint_type": "Tipo de hecho",
+    "complaint_body": "Contame qué pasó",
+    "submit": "Enviar denuncia",
+    "submitted": "Recibido. Llamá al 911 si es urgente.",
+    "hotlines_title": "Líneas activas"
+  },
+  "docs": {
+    "title": "Documentos digitales",
+    "share": "Compartir",
+    "audit_btn": "¿Quién vio mis datos?",
+    "audit_title": "Audit trail",
+    "audit_empty": "Nadie consultó tus datos en los últimos 30 días.",
+    "agency": "Agencia",
+    "action": "Acción",
+    "reason": "Motivo",
+    "ts": "Fecha"
+  }
+}

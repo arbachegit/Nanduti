@@ -1,0 +1,161 @@
+{
+  "app": { "name": "Ñandutí", "tagline": "Ne Paraguái, peteĩ conversación-pe." },
+  "hero": {
+    "title": "Ñandutí",
+    "subtitle": "Ne Paraguái, peteĩ conversación-pe.",
+    "lead": "Eporandu castellano-pe o guaraní-pe. La IA nde ayuda con tembiapo, tesãi, mbo'ehao, transferencia ha hetave mba'e.",
+    "cta": "Empezar",
+    "badge": "DEMO · MITIC + IconsAI"
+  },
+  "lang": { "label": "Idioma", "es": "Castellano", "gn": "Guaraní", "jopara": "Jopará" },
+  "phase": { "label": "Mockup ejecutivo", "next": "Para Presidencia del Paraguay" },
+  "onboarding": {
+    "step1_title": "Mba'éichapa, ciudadano paraguayo",
+    "step1_body": "Ñandutí ha'e la red de servicios IA-first del Estado. Hecha ndive, con respeto a ne marandu.",
+    "step2_title": "Identidad Electrónica MITIC",
+    "step2_body": "Ñañepyrũ con tu kuatia electrónica. Acceso a tembiapo, tesãi, mbo'ehao y billetera.",
+    "step3_title": "Voz, texto, lo que prefieras",
+    "step3_body": "Eñe'ẽ Ñandutí-pe en castellano, guaraní o jopará. Modo discreto oĩ si necesitás privacidad.",
+    "next": "Tenondévo",
+    "start": "Iniciar sesión",
+    "skip": "Saltar"
+  },
+  "auth": {
+    "title": "Identidad Electrónica",
+    "subtitle": "Iniciá sesión con tu kuatia paraguái",
+    "cedula_label": "Cédula",
+    "cedula_placeholder": "1234567",
+    "otp_label": "Código un solo uso",
+    "otp_placeholder": "123456",
+    "otp_hint": "Demo: el código es 123456",
+    "submit": "Eike",
+    "via_mitic": "O con paraguay.gov.py",
+    "demo_note": "Demo mockup. Ndoseúi ko navegador-gui.",
+    "invalid_cedula": "Cédula ndoikói",
+    "invalid_otp": "Código vai"
+  },
+  "chat": {
+    "placeholder": "Ehai o epoko micrófono-pe…",
+    "send": "Mondo",
+    "voice_start": "Epoko eñe'ẽ haguã",
+    "voice_recording": "Grabando…",
+    "thinking": "Pensando…",
+    "error": "Algo no anduvo bien. Ñañepyrũjey?",
+    "greeting": "Mba'éichapa, María. ¿En qué nepytyvõ ko ára?",
+    "suggested": "Probá:",
+    "examples": ["¿Cuánto areko?", "Renovar cédula", "Boletín de Sofía", "Sãso aguĩ", "Denuncia online"]
+  },
+  "sidebar": {
+    "title": "Servicios",
+    "wallet": "Billetera",
+    "gov": "Tembiapo",
+    "health": "Tesãi",
+    "edu": "Mbo'ehao",
+    "crypto": "Tarjeta USDC",
+    "info": "Marandu",
+    "alerts": "Sãso",
+    "police": "Denuncia",
+    "docs": "Kuatia"
+  },
+  "wallet": {
+    "title": "Billetera",
+    "balance_pyg": "Saldo paraguái",
+    "balance_usdc": "USDC",
+    "tab_transfer": "Mbohasa",
+    "tab_qr": "QR Hub",
+    "tab_history": "Tembiasakue",
+    "to_label": "Avápe",
+    "amount_label": "Monto (Gs.)",
+    "concept_label": "Concepto",
+    "send_btn": "Mbohasa",
+    "scan_qr": "Escanear QR",
+    "success": "Oĩma, Gs. {amount} enviados",
+    "error_balance": "Saldo ndahetái",
+    "card_label": "Mastercard ··· {last4}"
+  },
+  "gov": {
+    "title": "Tembiapo del Estado",
+    "search_placeholder": "Eheka tembiapo…",
+    "duration": "{min} min",
+    "free": "Gratis",
+    "digital": "100% digital",
+    "presencial": "Presencial",
+    "book": "Reservar turno",
+    "ruc_lookup": "Porandu RUC"
+  },
+  "health": {
+    "title": "Tesãi",
+    "tab_triage": "Triagem",
+    "tab_book": "Turno USF",
+    "tab_vaccine": "Vacuna óga",
+    "symptoms_label": "Ere chéve qué reñeñandu",
+    "ask": "Consultar",
+    "level_verde": "Leve",
+    "level_amarillo": "Atención",
+    "level_rojo": "Emergencia",
+    "emergency_call": "Ehenói 911",
+    "linea_155": "Línea 155",
+    "triage_disclaimer": "Esta orientación es informativa. NO sustituye atención médica profesional."
+  },
+  "edu": {
+    "title": "Mbo'ehao Sofía",
+    "tab_report": "Boletín",
+    "tab_enroll": "Matrícula",
+    "tab_tutor": "Tutor IA",
+    "subject_score": "Nota",
+    "attendance": "Oime jave",
+    "tutor_topic_label": "¿Mba'épa reikuaase ko ára?",
+    "tutor_ask": "Eipuka chéve"
+  },
+  "crypto": {
+    "title": "Tarjeta USDC",
+    "card_label": "Mastercard ··· {last4}",
+    "balance": "Saldo",
+    "rate": "1 USDC = Gs. {rate}",
+    "topup": "Recargar",
+    "topup_label": "Mboy Gs.",
+    "lock": "Embotĩ tarjeta",
+    "unlock": "Desbloquear",
+    "disclaimer": "Stablecoin USDC es activo virtual experimental. Marco regulatorio paraguáipe oĩ."
+  },
+  "info": {
+    "title": "Marandu del Estado",
+    "weekly_btn": "Resumen IA semanal",
+    "tab_feed": "Feed",
+    "tab_summary": "Resumen"
+  },
+  "alerts": {
+    "title": "Sãso geo",
+    "subscribe": "Eheñói",
+    "subscribed": "Eheñoýma",
+    "category_clima": "Ára",
+    "category_seguridad": "Seguridad",
+    "category_salud": "Tesãi",
+    "category_transito": "Tape",
+    "category_apagon": "Tata oguévo"
+  },
+  "police": {
+    "title": "Denuncia online",
+    "panic_btn": "BOTÓN DE PÁNICO",
+    "panic_holding": "Despachando en {sec}s — epoko ejei",
+    "deam_label": "DEAM aguĩ",
+    "discrete": "Modo discreto",
+    "discrete_intro": "Si necesitás esconder esta pantalla, epoko modo discreto. Sale a calculadora. Para volver: 7 epoko en display.",
+    "complaint_type": "Tipo",
+    "complaint_body": "Ere mba'épa oiko",
+    "submit": "Mondo denuncia",
+    "submitted": "Recibido. Ehenói 911 si es urgente.",
+    "hotlines_title": "Líneas oĩva"
+  },
+  "docs": {
+    "title": "Kuatia digital",
+    "share": "Compartir",
+    "audit_btn": "¿Quién vio mis datos?",
+    "audit_title": "Audit trail",
+    "audit_empty": "Nadie consultó ne marandu en 30 días.",
+    "agency": "Agencia",
+    "action": "Acción",
+    "reason": "Motivo",
+    "ts": "Ára"
+  }
+}
