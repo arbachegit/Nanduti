@@ -14,15 +14,44 @@ const SLIDES: SlideId[] = ['vision', 'conversation', 'apps', 'feed', 'sources', 
 const SLIDE_MS = 8200;
 
 /* ============================================================
-   Helpers
+   Helpers — formatação estável SSR/CSR (sem Intl, que muda por locale do user agent)
    ============================================================ */
 const r3 = (n: number) => Math.round(n * 1000) / 1000;
-const fmt = new Intl.DateTimeFormat('es-PY', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
-function fmtDate(iso?: string | null): string {
+
+const MONTHS: Record<string, string[]> = {
+  es: ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'],
+  pt: ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'],
+  en: ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'],
+  gn: ['jas','jak','jas','jas','jas','jas','jas','jas','jas','jas','jas','jas'],
+  jopara: ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'],
+};
+
+function fmtDayMonth(iso: string | null | undefined, locale = 'es'): string {
   if (!iso) return '';
-  try { return fmt.format(new Date(iso)); } catch { return ''; }
+  try {
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return '';
+    const day = d.getUTCDate();
+    const months = MONTHS[locale] ?? MONTHS.es;
+    return `${day} ${months[d.getUTCMonth()]}`;
+  } catch { return ''; }
 }
-const PYG = (n: number) => 'Gs. ' + Math.round(n).toLocaleString('es-PY').replace(/,/g, '.');
+
+// PYG — separador ponto, sem Intl pra evitar hydration mismatch
+function PYG(n: number): string {
+  const s = Math.round(n).toString();
+  const parts: string[] = [];
+  for (let i = s.length; i > 0; i -= 3) parts.unshift(s.slice(Math.max(0, i - 3), i));
+  return 'Gs. ' + parts.join('.');
+}
+
+// Number with dot thousands sep (estável)
+function fmtNumDot(n: number): string {
+  const s = Math.round(n).toString();
+  const parts: string[] = [];
+  for (let i = s.length; i > 0; i -= 3) parts.unshift(s.slice(Math.max(0, i - 3), i));
+  return parts.join('.');
+}
 
 const BRAND_LINES = Array.from({ length: 12 }, (_, i) => {
   const a = (i * Math.PI) / 6;
@@ -103,10 +132,10 @@ function SlideVision({ active, totals }: { active: boolean; totals: LandingData[
    Slide 02 — Conversation (demo with REAL BCP rate)
    ============================================================ */
 function SlideConversation({ active, cotacoes }: { active: boolean; cotacoes: LandingData['cotacoes'] }) {
-  const { t } = useNandutiLocale();
+  const { t, locale } = useNandutiLocale();
   const usd = cotacoes.find((c) => c.moeda_codigo === 'USD');
   const realResponse = usd
-    ? `Tu saldo: ${PYG(4_350_000)} + 247,83 USDC. Cotación BCP del ${fmtDate(usd.fecha_planilla)}: ${PYG(usd.valor_pyg)} por dólar.`
+    ? `Tu saldo: ${PYG(4_350_000)} + 247,83 USDC. Cotación BCP del ${fmtDayMonth(usd.fecha_planilla, locale)}: ${PYG(usd.valor_pyg)} por dólar.`
     : t('landing.howitworks.ai_response');
   return (
     <div className={`ndl-cnv ${active ? 'is-active' : ''}`}>
@@ -187,7 +216,7 @@ function makeMockup(id: string, data: LandingData): React.ReactElement {
         <span className="mk-w__pyg">{PYG(4_350_000)}</span>
         <span className="mk-w__usdc">
           247,83 USDC
-          {usd ? <span className="mk-w__rate">·  {Math.round(usd.valor_pyg).toLocaleString('es-PY').replace(/,/g, '.')} BCP</span> : null}
+          {usd ? <span className="mk-w__rate">·  {fmtNumDot(usd.valor_pyg)} BCP</span> : null}
         </span>
       </div>
     );
@@ -320,10 +349,13 @@ function SlideFeed({ active, feed, alerts, cotacoes }: {
   active: boolean; feed: LandingData['feed']; alerts: LandingData['alerts']; cotacoes: LandingData['cotacoes'];
 }) {
   const { t, locale } = useNandutiLocale();
-  const dateFmt = new Intl.DateTimeFormat(locale === 'pt' ? 'pt-BR' : locale === 'en' ? 'en-US' : 'es-PY', { day: '2-digit', month: 'short' });
-  const ago = (iso: string) => {
+  // "ago" estável em UTC pra evitar hydration mismatch no horário do servidor
+  const NOW_UTC = Date.UTC(2026, 4, 10, 18, 0); // server-stable reference (mai/2026)
+  const ago = (iso: string): string => {
     try {
-      const diff = Date.now() - new Date(iso).getTime();
+      const t0 = new Date(iso).getTime();
+      if (isNaN(t0)) return '';
+      const diff = Math.max(0, NOW_UTC - t0);
       const h = Math.round(diff / 3600000);
       if (h < 1) return Math.max(1, Math.round(diff / 60000)) + 'm';
       if (h < 24) return h + 'h';
@@ -349,7 +381,7 @@ function SlideFeed({ active, feed, alerts, cotacoes }: {
             <ul className="ndl-fd__list">
               {feed.slice(0, 5).map((it, i) => (
                 <li key={i} className="ndl-fd__item" style={{ ['--i' as string]: i } as React.CSSProperties}>
-                  <span className="ndl-fd__date ndl-mono">{dateFmt.format(new Date(it.publicado_em))}</span>
+                  <span className="ndl-fd__date ndl-mono">{fmtDayMonth(it.publicado_em, locale)}</span>
                   <span className="ndl-fd__title">{it.titulo}</span>
                 </li>
               ))}
@@ -379,7 +411,7 @@ function SlideFeed({ active, feed, alerts, cotacoes }: {
                 {cotacoes.map((c) => (
                   <span key={c.moeda_codigo} className="ndl-fd__rate">
                     <span className="ndl-fd__rateK ndl-mono">{c.moeda_codigo}</span>
-                    <span className="ndl-fd__rateV">{Math.round(c.valor_pyg).toLocaleString('es-PY').replace(/,/g, '.')}</span>
+                    <span className="ndl-fd__rateV">{fmtNumDot(c.valor_pyg)}</span>
                   </span>
                 ))}
               </div>
