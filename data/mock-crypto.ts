@@ -11,6 +11,8 @@ export const mockCrypto = {
     es: 'Stablecoin USDC es activo virtual experimental. Sujeto al marco regulatorio paraguayo en formación.',
     gn: 'Stablecoin USDC ha\'e mba\'erepy virtual jehechauka. Marco regulatorio paraguáipe oĩ.',
     jopara: 'Stablecoin USDC es activo virtual experimental. Marco regulatorio paraguáipe oĩ.',
+    pt: 'Stablecoin USDC é ativo virtual experimental. Sujeito ao marco regulatório paraguaio em formação.',
+    en: 'Stablecoin USDC is an experimental virtual asset. Subject to Paraguay\'s regulatory framework still in formation.',
   },
 };
 

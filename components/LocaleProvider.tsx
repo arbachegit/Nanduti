@@ -4,8 +4,10 @@ import React, { createContext, useContext, useState, useCallback, useMemo } from
 import esStrings from '@/data/i18n/es.json';
 import gnStrings from '@/data/i18n/gn.json';
 import joStrings from '@/data/i18n/jopara.json';
+import ptStrings from '@/data/i18n/pt.json';
+import enStrings from '@/data/i18n/en.json';
 
-export type NandutiLocale = 'es' | 'gn' | 'jopara';
+export type NandutiLocale = 'es' | 'gn' | 'jopara' | 'pt' | 'en';
 
 type StringsTree = Record<string, unknown>;
 
@@ -13,6 +15,8 @@ const dictionaries: Record<NandutiLocale, StringsTree> = {
   es: esStrings as StringsTree,
   gn: gnStrings as StringsTree,
   jopara: joStrings as StringsTree,
+  pt: ptStrings as StringsTree,
+  en: enStrings as StringsTree,
 };
 
 interface LocaleContextValue {

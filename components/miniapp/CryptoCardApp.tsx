@@ -8,7 +8,7 @@ interface CryptoData {
   card: { last4: string; locked: boolean; bin_sponsor: string };
   balances: { usdc: number; pyg_equiv: number };
   quote: { usdc_pyg: number; source: string };
-  disclaimer: { es: string; gn: string; jopara: string };
+  disclaimer: Partial<Record<'es' | 'gn' | 'jopara' | 'pt' | 'en', string>>;
 }
 
 export default function CryptoCardApp() {
@@ -61,7 +61,7 @@ export default function CryptoCardApp() {
       <section className="nd-card cry__topup">
         <span className="nd-eyebrow">{t('crypto.topup')}</span>
         <div className="cry__row">
-          <input className="nd-input nd-mono" value={topupAmt} onChange={(e) => setTopupAmt(e.target.value)} placeholder="500.000" inputMode="numeric" />
+          <input className="nd-input nd-mono" value={topupAmt} onChange={(e) => setTopupAmt(e.target.value)} placeholder={t('crypto.topup_placeholder')} inputMode="numeric" />
           <button type="button" className="nd-btn nd-btn--primary" onClick={doTopup} disabled={!topupAmt}>+ USDC</button>
         </div>
         {topupResult ? (

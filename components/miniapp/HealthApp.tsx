@@ -42,7 +42,7 @@ export default function HealthApp() {
         <section className="hea__triage nd-card">
           <label>
             <span>{t('health.symptoms_label')}</span>
-            <textarea className="nd-input" rows={3} value={symptoms} onChange={(e) => setSymptoms(e.target.value)} placeholder="Tengo fiebre y dolor de cabeza desde anoche…" />
+            <textarea className="nd-input" rows={3} value={symptoms} onChange={(e) => setSymptoms(e.target.value)} placeholder={t('health.symptoms_placeholder')} />
           </label>
           <button type="button" className="nd-btn nd-btn--primary" disabled={!symptoms} onClick={askTriage}>{t('health.ask')}</button>
           {triage ? (
@@ -66,7 +66,7 @@ export default function HealthApp() {
       {tab === 'book' ? (
         <section className="hea__book nd-card">
           <p>USF Trinidad — Av. Mcal. López 4810. Próximos turnos en 48h.</p>
-          <button type="button" className="nd-btn nd-btn--primary" onClick={() => callTool('health.book_appointment', { usf_id: 'usf-trinidad' })}>Reservar turno</button>
+          <button type="button" className="nd-btn nd-btn--primary" onClick={() => callTool('health.book_appointment', { usf_id: 'usf-trinidad' })}>{t('health.book_btn')}</button>
         </section>
       ) : null}
 

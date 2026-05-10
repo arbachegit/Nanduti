@@ -59,9 +59,9 @@ export default function WalletApp() {
 
       {tab === 'transfer' ? (
         <section className="wapp__form nd-card">
-          <label><span>{t('wallet.to_label')}</span><input className="nd-input" value={to} onChange={(e) => setTo(e.target.value)} placeholder="Nombre o cédula" /></label>
-          <label><span>{t('wallet.amount_label')}</span><input className="nd-input nd-mono" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="100.000" inputMode="numeric" /></label>
-          <label><span>{t('wallet.concept_label')}</span><input className="nd-input" value={concept} onChange={(e) => setConcept(e.target.value)} placeholder="Almuerzo familia" /></label>
+          <label><span>{t('wallet.to_label')}</span><input className="nd-input" value={to} onChange={(e) => setTo(e.target.value)} placeholder={t('wallet.to_placeholder')} /></label>
+          <label><span>{t('wallet.amount_label')}</span><input className="nd-input nd-mono" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder={t('wallet.amount_placeholder')} inputMode="numeric" /></label>
+          <label><span>{t('wallet.concept_label')}</span><input className="nd-input" value={concept} onChange={(e) => setConcept(e.target.value)} placeholder={t('wallet.concept_placeholder')} /></label>
           <button type="button" onClick={submitTransfer} disabled={!to || !amount} className="nd-btn nd-btn--primary">{t('wallet.send_btn')}</button>
           {transferResult ? (
             <p className={`wapp__msg ${transferResult.ok ? 'is-ok' : 'is-err'}`}>
@@ -80,7 +80,7 @@ export default function WalletApp() {
               <strong>{qrResult.merchant}</strong>
               <span className="nd-mono">Gs. {fmtPyg(qrResult.amount)}</span>
               <span>{qrResult.address}</span>
-              <button type="button" className="nd-btn nd-btn--primary">Confirmar pago</button>
+              <button type="button" className="nd-btn nd-btn--primary">{t('wallet.confirm_pay_btn')}</button>
             </div>
           ) : null}
         </section>

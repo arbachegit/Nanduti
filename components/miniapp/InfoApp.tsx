@@ -39,8 +39,8 @@ export default function InfoApp() {
         </ul>
       ) : (
         <article className="nd-card inf__summary">
-          <span className="nd-eyebrow">Resumen IA · {locale}</span>
-          {summary ? <p>{summary.summary}</p> : <p className="nd-pulse">Cargando…</p>}
+          <span className="nd-eyebrow">{t('info.tab_summary')} · {locale}</span>
+          {summary ? <p>{summary.summary}</p> : <p className="nd-pulse">{t('common.loading')}</p>}
         </article>
       )}
 

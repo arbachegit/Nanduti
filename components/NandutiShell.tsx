@@ -90,7 +90,7 @@ export default function NandutiShell() {
         </div>
         <div className="shell__r">
           <LangSwitcher />
-          <button type="button" className="shell__logout" onClick={() => { try { window.localStorage.removeItem('nanduti.session'); } catch { /* noop */ } setAuthed(false); setShowOnboarding(true); }}>Cerrar sesión</button>
+          <button type="button" className="shell__logout" onClick={() => { try { window.localStorage.removeItem('nanduti.session'); } catch { /* noop */ } setAuthed(false); setShowOnboarding(true); }}>{t('common.logout')}</button>
         </div>
       </header>
 
@@ -108,7 +108,7 @@ export default function NandutiShell() {
           <div className="shell__modal_card">
             <header>
               <h3>{t(TITLE_KEY[active])}</h3>
-              <button type="button" className="shell__close" onClick={close} aria-label="Cerrar">✕</button>
+              <button type="button" className="shell__close" onClick={close} aria-label={t('common.close')}>✕</button>
             </header>
             <div className="shell__modal_body">
               {active === 'wallet' ? <WalletApp /> : null}
@@ -122,7 +122,7 @@ export default function NandutiShell() {
               {active === 'docs' ? <DocsApp /> : null}
             </div>
           </div>
-          <button type="button" className="shell__backdrop" aria-label="Cerrar" onClick={close} />
+          <button type="button" className="shell__backdrop" aria-label={t('common.close')} onClick={close} />
         </div>
       ) : null}
 
