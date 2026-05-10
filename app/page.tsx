@@ -1,5 +1,5 @@
-import NandutiShell from '@/components/NandutiShell';
+import Landing from '@/components/landing/Landing';
 
-export default function NandutiPage() {
-  return <NandutiShell />;
+export default function HomePage() {
+  return <Landing />;
 }

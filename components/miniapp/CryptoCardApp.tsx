@@ -8,7 +8,7 @@ interface CryptoData {
   card: { last4: string; locked: boolean; bin_sponsor: string };
   balances: { usdc: number; pyg_equiv: number };
   quote: { usdc_pyg: number; source: string };
-  disclaimer: { es: string; gn: string; jopara: string };
+  disclaimer: Partial<Record<'es' | 'gn' | 'jopara' | 'pt' | 'en', string>>;
 }
 
 export default function CryptoCardApp() {

@@ -7,7 +7,7 @@
     "cta": "Eñepyrũ",
     "badge": "JEHECHAUKA · MITIC + IconsAI"
   },
-  "lang": { "label": "Ñe'ẽ", "es": "Kastelláno", "gn": "Avañe'ẽ", "jopara": "Jopara" },
+  "lang": { "label": "Ñe'ẽ", "es": "Kastelláno", "gn": "Avañe'ẽ", "jopara": "Jopara", "pt": "Portuguése", "en": "Inglés" },
   "phase": { "label": "Mockup", "next": "Paraguái Tetãygua Ruvichápe" },
   "onboarding": {
     "step1_title": "Mba'éichapa, paraguái tetãygua",
@@ -157,5 +157,68 @@
     "action": "Mba'apo",
     "reason": "Mba'erã",
     "ts": "Ára"
+  },
+  "landing": {
+    "nav": { "open_app": "Eha'arõ Ñandutí", "how_works": "Mba'éichapa oiko", "demo_label": "Jehechauka" },
+    "hero": {
+      "eyebrow": "Tetãygua portal · IA · 2026",
+      "title_l1": "Ne Paraguái,",
+      "title_l2": "peteĩ ñomongetápe.",
+      "lead": "Eporandu po ñe'ẽgui peteĩme. IA oconectá ne kuatia tetã rembiapokuéra ndive — tembiapo, tesãi, mbo'ehao, sãso, denuncia, viru.",
+      "cta_primary": "Eha'arõ Ñandutí",
+      "cta_secondary": "Mba'éichapa oiko",
+      "meta": "MITIC × IconsAI · jehechauka"
+    },
+    "stats": { "rows_label": "tysýi añetegua", "workflows_label": "cron tembiapo", "sources_label": "tetã raperã", "tools_label": "tembipuru", "languages_label": "ñe'ẽ" },
+    "howitworks": {
+      "eyebrow": "Ñomongeta · 1 ñe'ẽ, 1 tembiapo",
+      "title": "Peteĩ porandu. Peteĩ tembipuru. Peteĩ ñembohovái.",
+      "lead": "Tetãygua oporandu iñe'ẽme. IA oiporavó mba'e tembipuru ohenói ha ombohovái marandu añetegua tetãgui.",
+      "user_msg": "Mboýpa areko?",
+      "tool_call_label": "Tembipuru ñehenói",
+      "tool_result_label": "Tetã marandu",
+      "ai_response": "Ne viru: Gs. 4.350.000 + 247,83 USDC. BCP cotización ko ára: Gs. 6.159,41 dólar rehe.",
+      "thinking": "Oje'apesa…",
+      "step1": "Tetãygua oporandu", "step2": "IA oiporavó tembipuru", "step3": "Banco ombohovái", "step4": "IA ohumaniza"
+    },
+    "miniapps": {
+      "eyebrow": "Porundy mini-app",
+      "title": "Opaite tetã rembiapo, peteĩ ñomongeta.",
+      "lead": "Cada mini-app oencapsulá peteĩ dominio. IA oorquesta tools.",
+      "wallet_tag": "Viru PYG + USDC, mbohasa, QR Hub",
+      "gov_tag": "Tembiapo paraguay.gov.py · DNIT RUC",
+      "health_tag": "Triagem es/gn/jo · USF · vacuna óga",
+      "edu_tag": "Boletín · matrícula · tutor IA",
+      "crypto_tag": "Mastercard USDC · Bancard · Circle",
+      "info_tag": "Tetã marandu · resumen IA semana",
+      "alerts_tag": "SEN · DINAC · ANDE sãso",
+      "police_tag": "Pánico · DEAM · modo discreto",
+      "docs_tag": "W3C VC · audit · QR"
+    },
+    "datasources": {
+      "eyebrow": "Paraguáy marandu añetegua",
+      "title": "7 tetã raperã, tiempo real.",
+      "lead": "GitHub Actions cron-pe ohai Supabase-pe. Tools olee vistas SQL.",
+      "live": "vivo",
+      "table_source": "Raperã", "table_kind": "Mba'éichagua", "table_cron": "Frecuencia", "table_rows": "Tysýi"
+    },
+    "architecture": {
+      "eyebrow": "Stack soberana",
+      "title": "Arquitectura orespetá marandu.",
+      "lead": "Mba'eve tetãygua nosẽi Paraguay-gui. Identidad federada, RLS, audit estoniano.",
+      "layer1_title": "Mboaty autónoma",
+      "layer1_body": "GitHub Actions odisparán Python scrapers. Pydantic ovalida, SHA256 odeduplica.",
+      "layer2_title": "Banco RLS-ndive",
+      "layer2_body": "Supabase nanduti.* — raw, staging, vistas.",
+      "layer3_title": "Orquestrador",
+      "layer3_body": "Next.js 15 oenrutá 28 tembipuru. Redis caché.",
+      "layer4_title": "Modelos",
+      "layer4_body": "DigitalOcean Gradient AI. Haiku 3.5 + Sonnet 4."
+    },
+    "footer": {
+      "manifesto": "Peteĩ infraestructura digital ojeméde tetãygua respeto rehe.",
+      "credit": "Ñandutí · MITIC × IconsAI · 2026",
+      "demo_note": "Jehechauka. Marandu añetegua, persona jehechauka."
+    }
   }
 }

@@ -7,7 +7,7 @@
     "cta": "Empezar",
     "badge": "DEMO · MITIC + IconsAI"
   },
-  "lang": { "label": "Idioma", "es": "Español", "gn": "Guaraní", "jopara": "Jopará" },
+  "lang": { "label": "Idioma", "es": "Español", "gn": "Guaraní", "jopara": "Jopará", "pt": "Portugués", "en": "Inglés" },
   "phase": { "label": "Mockup ejecutivo", "next": "Para Presidencia del Paraguay" },
   "onboarding": {
     "step1_title": "Mba'éichapa, ciudadano paraguayo",
@@ -157,5 +157,68 @@
     "action": "Acción",
     "reason": "Motivo",
     "ts": "Fecha"
+  },
+  "landing": {
+    "nav": { "open_app": "Probar Ñandutí", "how_works": "Cómo funciona", "demo_label": "Demo institucional" },
+    "hero": {
+      "eyebrow": "Portal ciudadano · IA-first · 2026",
+      "title_l1": "Tu Paraguay,",
+      "title_l2": "en una conversación.",
+      "lead": "Pedile en cualquiera de cinco idiomas. La IA conecta tu cédula con servicios reales del Estado — trámites, salud, escuela, alertas, denuncias, billetera.",
+      "cta_primary": "Probar Ñandutí",
+      "cta_secondary": "Ver cómo funciona",
+      "meta": "MITIC × IconsAI · demo institucional"
+    },
+    "stats": { "rows_label": "filas reales", "workflows_label": "workflows cron", "sources_label": "fuentes paraguayas", "tools_label": "herramientas", "languages_label": "idiomas" },
+    "howitworks": {
+      "eyebrow": "Diálogo · 1 prompt, 1 acción",
+      "title": "Una pregunta. Una herramienta. Una respuesta.",
+      "lead": "El ciudadano pregunta en su idioma. La IA decide qué tool llamar y devuelve datos reales del Estado paraguayo.",
+      "user_msg": "¿Cuánto tengo?",
+      "tool_call_label": "Llamada a herramienta",
+      "tool_result_label": "Datos del Estado",
+      "ai_response": "Tu saldo: Gs. 4.350.000 + 247,83 USDC. Cotización BCP de hoy: Gs. 6.159,41 por dólar.",
+      "thinking": "Pensando…",
+      "step1": "Ciudadano pregunta", "step2": "IA elige tool", "step3": "Banco responde", "step4": "IA humaniza"
+    },
+    "miniapps": {
+      "eyebrow": "Nueve micro-aplicaciones",
+      "title": "Cada servicio del Estado, una conversación.",
+      "lead": "Cada mini-app encapsula un dominio. La IA orquesta tools sin que el ciudadano sienta la frontera.",
+      "wallet_tag": "Saldo PYG + USDC, transferencias, QR Hub",
+      "gov_tag": "Trámites paraguay.gov.py · DNIT RUC",
+      "health_tag": "Triagem es/gn/jo · USF · vacunas familia",
+      "edu_tag": "Boletín · matrícula · tutor IA bilingüe",
+      "crypto_tag": "Mastercard USDC · Bancard adq · Circle",
+      "info_tag": "Feed del Estado · resumen IA semanal",
+      "alerts_tag": "SEN · DINAC · ANDE geo-alertas",
+      "police_tag": "Botón pánico · DEAM · modo discreto",
+      "docs_tag": "W3C VC · audit estoniano · QR validación"
+    },
+    "datasources": {
+      "eyebrow": "Datos del Paraguay real",
+      "title": "Siete fuentes oficiales, en tiempo casi real.",
+      "lead": "GitHub Actions cron-driven ETL escribe diariamente en Supabase. Tools leen vistas SQL — nunca tocan APIs en runtime.",
+      "live": "en vivo",
+      "table_source": "Fuente", "table_kind": "Tipo", "table_cron": "Frecuencia", "table_rows": "Filas"
+    },
+    "architecture": {
+      "eyebrow": "Stack soberana",
+      "title": "Arquitectura que respeta los datos.",
+      "lead": "Nada del ciudadano sale del Paraguay. Identidad federada, RLS por usuario, audit trail estoniano, modelos auditables.",
+      "layer1_title": "Colecta autónoma",
+      "layer1_body": "GitHub Actions disparan scrapers Python. Pydantic valida, SHA256 deduplica.",
+      "layer2_title": "Banco con RLS",
+      "layer2_body": "Supabase nanduti.* — raw, staging, vistas. RLS bloquea cruzamientos.",
+      "layer3_title": "Orquestrador",
+      "layer3_body": "Next.js 15 enruta 28 tools. Caché Redis. Identidad opcional MITIC.",
+      "layer4_title": "Modelos",
+      "layer4_body": "DigitalOcean Gradient AI. Haiku 3.5 orquesta, Sonnet 4 razona."
+    },
+    "footer": {
+      "manifesto": "Una infraestructura digital se mide por su respeto al ciudadano.",
+      "credit": "Ñandutí · MITIC × IconsAI · 2026",
+      "demo_note": "Demo institucional. Datos reales, persona ficticia."
+    }
   }
 }

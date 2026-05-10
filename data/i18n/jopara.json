@@ -7,7 +7,7 @@
     "cta": "Empezar",
     "badge": "DEMO · MITIC + IconsAI"
   },
-  "lang": { "label": "Idioma", "es": "Castellano", "gn": "Guaraní", "jopara": "Jopará" },
+  "lang": { "label": "Idioma", "es": "Castellano", "gn": "Guaraní", "jopara": "Jopará", "pt": "Portugués", "en": "Inglés" },
   "phase": { "label": "Mockup ejecutivo", "next": "Para Presidencia del Paraguay" },
   "onboarding": {
     "step1_title": "Mba'éichapa, ciudadano paraguayo",
@@ -157,5 +157,68 @@
     "action": "Acción",
     "reason": "Motivo",
     "ts": "Ára"
+  },
+  "landing": {
+    "nav": { "open_app": "Probar Ñandutí", "how_works": "Mba'éichapa oiko", "demo_label": "Demo institucional" },
+    "hero": {
+      "eyebrow": "Portal ciudadano · IA-first · 2026",
+      "title_l1": "Ne Paraguái,",
+      "title_l2": "peteĩ ñomongetápe.",
+      "lead": "Eporandu cualquier idioma-pe. La IA oconectá ne kuatia con servicios reales — tembiapo, tesãi, mbo'ehao, sãso, denuncia, billetera.",
+      "cta_primary": "Probar Ñandutí",
+      "cta_secondary": "Mba'éichapa oiko",
+      "meta": "MITIC × IconsAI · demo"
+    },
+    "stats": { "rows_label": "filas reales", "workflows_label": "cron workflows", "sources_label": "fuentes paraguái", "tools_label": "herramientas", "languages_label": "idiomas" },
+    "howitworks": {
+      "eyebrow": "Ñomongeta · 1 prompt, 1 acción",
+      "title": "Peteĩ porandu. Peteĩ tool. Peteĩ ñembohovái.",
+      "lead": "El ciudadano oporandu su idioma-pe. La IA odecidí qué tool ohenói y devuelve marandu real del Estado paraguáyo.",
+      "user_msg": "¿Mboýpa areko?",
+      "tool_call_label": "Tool ñehenói",
+      "tool_result_label": "Marandu del Estado",
+      "ai_response": "Ne saldo: Gs. 4.350.000 + 247,83 USDC. Cotización BCP ko ára: Gs. 6.159,41 por dólar.",
+      "thinking": "Pensando…",
+      "step1": "Ciudadano oporandu", "step2": "IA oiporavó tool", "step3": "Banco ombohovái", "step4": "IA ohumaniza"
+    },
+    "miniapps": {
+      "eyebrow": "Nueve micro-apps",
+      "title": "Cada servicio del Estado, peteĩ ñomongeta.",
+      "lead": "Cada mini-app oencapsulá peteĩ dominio. La IA oorquesta tools sin que el ciudadano osẽndi la frontera.",
+      "wallet_tag": "Saldo PYG + USDC, mbohasa, QR Hub",
+      "gov_tag": "Tembiapo paraguay.gov.py · DNIT RUC",
+      "health_tag": "Triagem es/gn/jo · USF · vacuna óga",
+      "edu_tag": "Boletín · matrícula · tutor IA jopará",
+      "crypto_tag": "Mastercard USDC · Bancard · Circle",
+      "info_tag": "Feed Estado · resumen IA semanal",
+      "alerts_tag": "SEN · DINAC · ANDE sãso geo",
+      "police_tag": "Pánico · DEAM · modo discreto",
+      "docs_tag": "W3C VC · audit estoniano · QR"
+    },
+    "datasources": {
+      "eyebrow": "Marandu del Paraguay real",
+      "title": "7 fuentes oficiales, casi tiempo real.",
+      "lead": "GitHub Actions cron-driven ETL ohai diariamente Supabase-pe. Tools olee vistas SQL — naomboúi APIs runtime-pe.",
+      "live": "vivo-pe",
+      "table_source": "Fuente", "table_kind": "Tipo", "table_cron": "Frecuencia", "table_rows": "Filas"
+    },
+    "architecture": {
+      "eyebrow": "Stack soberana",
+      "title": "Arquitectura que orespetá la marandu.",
+      "lead": "Mba'eve del ciudadano nosẽi del Paraguay. Identidad federada, RLS por user, audit estoniano, modelos auditables.",
+      "layer1_title": "Colecta autónoma",
+      "layer1_body": "GitHub Actions odisparán scrapers Python. Pydantic ovalida, SHA256 odeduplica.",
+      "layer2_title": "Banco con RLS",
+      "layer2_body": "Supabase nanduti.* — raw, staging, vistas. RLS obloqueá cruces.",
+      "layer3_title": "Orquestrador",
+      "layer3_body": "Next.js 15 oenrutá 28 tools. Caché Redis. Identidad opcional MITIC.",
+      "layer4_title": "Modelos",
+      "layer4_body": "DigitalOcean Gradient AI. Haiku 3.5 oorquesta, Sonnet 4 orazoná."
+    },
+    "footer": {
+      "manifesto": "Peteĩ infraestructura digital ojeméde por su respeto al ciudadano.",
+      "credit": "Ñandutí · MITIC × IconsAI · 2026",
+      "demo_note": "Demo institucional. Marandu real, persona ficticia."
+    }
   }
 }
