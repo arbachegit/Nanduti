@@ -1,0 +1,54 @@
+# =============================================================
+# Template reutilizável para workflows ETL Ñandutí.
+#
+# Para criar um novo scraper, copie este arquivo para
+# .github/workflows/etl-<fonte>.yml e ajuste:
+#   - name
+#   - schedule cron
+#   - concurrency group
+#   - path do scraper Python
+#
+# Cada workflow é independente e idempotente.
+# =============================================================
+name: etl-template (DESATIVADO — apenas referência)
+
+on:
+  workflow_dispatch:
+  # schedule:
+  #   - cron: '*/30 * * * *'   # exemplo: a cada 30min
+
+concurrency:
+  group: etl-template
+  cancel-in-progress: true
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: scrapers/requirements.txt
+
+      - run: pip install -r scrapers/requirements.txt
+
+      - name: Run scraper
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE: ${{ secrets.SUPABASE_SERVICE_ROLE }}
+          DRY_RUN: ${{ inputs.dry_run || 'false' }}
+        run: python -m presidencia.run    # ajustar pro módulo da fonte
+        working-directory: scrapers
+
+      - name: Notify Slack on failure
+        if: failure() && env.SLACK_ETL_WEBHOOK != ''
+        env:
+          SLACK_ETL_WEBHOOK: ${{ secrets.SLACK_ETL_WEBHOOK }}
+        run: |
+          curl -s -X POST -H 'content-type: application/json' \
+            -d "{\"text\":\"❌ ETL template falhou em ${{ github.repository }} run ${{ github.run_id }}\"}" \
+            "$SLACK_ETL_WEBHOOK"

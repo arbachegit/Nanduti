@@ -4,6 +4,7 @@
  */
 import { TOOLS, asAnthropicTools, getTool, dotName } from './tool-registry';
 import { cacheGet, cacheSet, cacheKey } from './redis-cache';
+import { llm, llmAvailable, MODEL_FAST } from './llm-client';
 
 export type Lang = 'es' | 'gn' | 'jopara';
 
@@ -82,15 +83,14 @@ export async function orchestrate(input: OrchestrateInput, push: (c: Orchestrate
   const buf: OrchestrateChunk[] = [];
   const wrapped = (c: OrchestrateChunk) => { buf.push(c); push(c); };
 
-  if (!process.env.ANTHROPIC_API_KEY) {
+  if (!llmAvailable() || !llm) {
     await deterministicReply(input, wrapped);
     await cacheSet(key, buf, 300);
     return;
   }
 
   try {
-    const Anthropic = (await import('@anthropic-ai/sdk')).default;
-    const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+    const client = llm;
     const tools = asAnthropicTools();
 
     const msgs: Array<{ role: 'user' | 'assistant'; content: unknown }> = [];
@@ -100,7 +100,7 @@ export async function orchestrate(input: OrchestrateInput, push: (c: Orchestrate
     let safetyTurns = 4;
     while (safetyTurns-- > 0) {
       const resp = await client.messages.create({
-        model: 'claude-sonnet-4-6',
+        model: MODEL_FAST,
         max_tokens: 800,
         system: SYSTEM_PROMPT_BY_LANG[input.lang],
         tools: tools as unknown as Parameters<typeof client.messages.create>[0]['tools'],
