@@ -32,11 +32,25 @@ scrapers/
 ├── ande/                    # cortes energia
 ├── bcp/                     # cotação USD/PYG
 ├── dncp/                    # OCDS API
+├── datos_gov_py/            # CKAN catalog discovery (MEC + MSPBS + MITIC)
 ├── paraguay_gov/            # catálogo trámites
-├── mec/                     # SIIIE instituciones + matrículas
-├── mspbs/                   # USFs
+├── mec/                     # datos.mec.gov.py DKAN (escolas + matrículas)
+├── mec_github/              # mecpy/* mirror (run = metadata, run_content = CSVs)
+├── mspbs/                   # USFs via CKAN MSPBS
+├── dnit_ruc/                # consultaRUC API (empresas)
+├── sen/                     # SEN scraping HTML direto
 └── seprelad/                # resoluciones cripto
 ```
+
+## Fontes de dados demográficos (saúde/educação/empresas)
+
+| Fonte | Módulo | Workflow | Cron |
+|---|---|---|---|
+| MEC datos portal (escolas, matrículas) | `mec.run` | `etl-mec-datos-portal.yml` | seg 05:00 UTC |
+| MEC GitHub metadata | `mec_github.run` | `etl-mec-github-mirror.yml` | dom 04:00 UTC |
+| MEC GitHub conteúdo CSV | `mec_github.run_content` | `etl-mec-github-content.yml` | dom 04:30 UTC |
+| MSPBS USFs (saúde) | `mspbs.run` | `etl-mspbs-usf.yml` | mensal 05:00 UTC |
+| DNIT consultaRUC (empresas) | `dnit_ruc.run` | `etl-dnit-ruc.yml` | diário 06:00 UTC |
 
 ## Rodar local
 
