@@ -9,20 +9,24 @@ import { APP_ICON } from './icons';
 import type { LandingData } from '@/lib/data-source/landing';
 import './landing.css';
 
-type SlideId = 'vision' | 'conversation' | 'apps' | 'feed' | 'sources' | 'manifesto';
-const SLIDES: SlideId[] = ['vision', 'conversation', 'apps', 'feed', 'sources', 'manifesto'];
-const SLIDE_MS = 8200;
-
 /* ============================================================
-   Helpers — formatação estável SSR/CSR (sem Intl, que muda por locale do user agent)
+   ÑANDUTÍ · ALMANAQUE SOBERANO
+   Editorial magazine deck — dark corporate, sovereign craft.
    ============================================================ */
+
+type SlideId = 'cover' | 'dialogo' | 'catalogo' | 'despachos' | 'infraestructura' | 'colofon';
+const SLIDES: SlideId[] = ['cover', 'dialogo', 'catalogo', 'despachos', 'infraestructura', 'colofon'];
+const ROMANS = ['I', 'II', 'III', 'IV', 'V', 'VI'] as const;
+const SLIDE_MS = 8400;
+
+/* ─── Helpers — stable formatters (no Intl) ─────────────────── */
 const r3 = (n: number) => Math.round(n * 1000) / 1000;
 
 const MONTHS: Record<string, string[]> = {
-  es: ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'],
-  pt: ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'],
-  en: ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'],
-  gn: ['jas','jak','jas','jas','jas','jas','jas','jas','jas','jas','jas','jas'],
+  es:     ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'],
+  pt:     ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'],
+  en:     ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'],
+  gn:     ['jas','jak','aji','rai','jim','jak','jas','jas','jas','jas','jas','jas'],
   jopara: ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'],
 };
 
@@ -31,13 +35,10 @@ function fmtDayMonth(iso: string | null | undefined, locale = 'es'): string {
   try {
     const d = new Date(iso);
     if (isNaN(d.getTime())) return '';
-    const day = d.getUTCDate();
-    const months = MONTHS[locale] ?? MONTHS.es;
-    return `${day} ${months[d.getUTCMonth()]}`;
+    return `${d.getUTCDate()} ${(MONTHS[locale] ?? MONTHS.es)[d.getUTCMonth()]}`;
   } catch { return ''; }
 }
 
-// PYG — separador ponto, sem Intl pra evitar hydration mismatch
 function PYG(n: number): string {
   const s = Math.round(n).toString();
   const parts: string[] = [];
@@ -45,7 +46,6 @@ function PYG(n: number): string {
   return 'Gs. ' + parts.join('.');
 }
 
-// Number with dot thousands sep (estável)
 function fmtNumDot(n: number): string {
   const s = Math.round(n).toString();
   const parts: string[] = [];
@@ -53,6 +53,17 @@ function fmtNumDot(n: number): string {
   return parts.join('.');
 }
 
+function wordCount(text: string | null | undefined): number {
+  if (!text) return 0;
+  const stripped = text.replace(/<[^>]*>/g, ' ').replace(/&[#a-z0-9]+;/gi, ' ').trim();
+  return stripped ? stripped.split(/\s+/).length : 0;
+}
+
+function readMins(words: number): number {
+  return Math.max(1, Math.round(words / 220));
+}
+
+/* ─── Brand mark (concentric Ñandutí radial) ────────────────── */
 const BRAND_LINES = Array.from({ length: 12 }, (_, i) => {
   const a = (i * Math.PI) / 6;
   return {
@@ -63,7 +74,7 @@ const BRAND_LINES = Array.from({ length: 12 }, (_, i) => {
   };
 });
 
-function BrandMark({ size = 26 }: { size?: number }) {
+function BrandMark({ size = 22 }: { size?: number }) {
   return (
     <svg viewBox="0 0 64 64" width={size} height={size} aria-hidden="true">
       <g fill="none" stroke="currentColor" strokeWidth="1.2">
@@ -79,49 +90,75 @@ function BrandMark({ size = 26 }: { size?: number }) {
   );
 }
 
-/* ============================================================
-   Top bar
-   ============================================================ */
-function TopBar() {
+/* ─── Masthead ──────────────────────────────────────────────── */
+function Masthead() {
   const { t } = useNandutiLocale();
   return (
-    <header className="ndl-bar">
-      <Link href="/" className="ndl-bar__brand" aria-label="Ñandutí">
-        <span className="ndl-bar__mark"><BrandMark size={24} /></span>
-        <span className="ndl-bar__name">Ñandutí</span>
-        <span className="ndl-bar__tag">{t('landing.nav.demo_label')}</span>
-      </Link>
-      <div className="ndl-bar__r">
+    <header className="mast">
+      <div className="mast__l">
+        <Link href="/" className="mast__brand" aria-label="Ñandutí">
+          <span className="mast__brand-mark"><BrandMark size={22} /></span>
+          <span className="mast__brand-name">Ñandutí</span>
+        </Link>
+      </div>
+      <div className="mast__center">
+        <span className="mast__issue">N°01</span>
+        <span className="mast__rule" aria-hidden />
+        <span className="mast__date">Mayo MMXXVI</span>
+        <span className="mast__rule" aria-hidden />
+        <span className="mast__loc">{t('landing.nav.demo_label')}</span>
+      </div>
+      <div className="mast__r">
         <LangSwitcher />
-        <Link href="/app" className="ndl-bar__cta">{t('landing.nav.open_app')}</Link>
+        <Link href="/app" className="mast__cta">{t('landing.nav.open_app')}</Link>
       </div>
     </header>
   );
 }
 
-/* ============================================================
-   Slide 01 — Vision
-   ============================================================ */
-function SlideVision({ active, totals }: { active: boolean; totals: LandingData['totals'] }) {
-  const { t } = useNandutiLocale();
+/* ─── Section header (Roman numeral + section name) ─────────── */
+function SectionHeader({ roman, name, right }: { roman: string; name: string; right?: string }) {
   return (
-    <div className={`ndl-vsn ${active ? 'is-active' : ''}`}>
-      <div className="ndl-vsn__lace" aria-hidden>
-        <Lace size={780} rays={20} rings={6} stroke="#22d3ee" opacity={0.10} spinSec={240} />
+    <div className="sec">
+      <span className="sec__rom">{roman}</span>
+      <span className="sec__nm">{name}</span>
+      <span className="sec__bar" />
+      {right ? <span className="sec__r">{right}</span> : null}
+    </div>
+  );
+}
+
+/* ============================================================
+   I — COVER
+   ============================================================ */
+function SlideCover({ active, totals }: { active: boolean; totals: LandingData['totals'] }) {
+  const { t } = useNandutiLocale();
+  const liveRows = totals.feed_rows + totals.bcp_rows + totals.dncp_rows + totals.alerts_rows;
+  return (
+    <div className={`cv ${active ? 'is-active' : ''}`}>
+      <div className="cv__seal" aria-hidden>
+        <Lace size={720} rays={20} rings={6} stroke="#22d3ee" opacity={0.16} spinSec={360} />
       </div>
-      <div className="ndl-vsn__inner">
-        <span className="ndl-vsn__eb ndl-eyebrow">{t('landing.hero.eyebrow')}</span>
-        <h1 className="ndl-vsn__h">
-          <span className="ndl-vsn__l1">{t('landing.hero.title_l1')}</span>
-          <span className="ndl-vsn__l2">{t('landing.hero.title_l2')}</span>
+      <div className="cv__inner">
+        <div className="cv__row">
+          <span className="t-label t-label-cyan">{t('landing.hero.eyebrow')}</span>
+        </div>
+        <h1 className="cv__title t-display-xl">
+          <span className="cv__l1">{t('landing.hero.title_l1')}</span>
+          <span className="cv__l2">{t('landing.hero.title_l2')}</span>
         </h1>
-        <p className="ndl-vsn__lead">{t('landing.hero.lead')}</p>
-        <div className="ndl-vsn__row">
-          <Link href="/app" className="ndl-vsn__cta">{t('landing.hero.cta_primary')}</Link>
-          <span className="ndl-vsn__live">
-            <span className="ndl-vsn__pdot" />
-            <span className="ndl-mono">{totals.coletas_rows} coletas · {totals.feed_rows + totals.bcp_rows + totals.dncp_rows} linhas reais · ao vivo</span>
+        <p className="cv__lead">{t('landing.hero.lead')}</p>
+        <div className="cv__ctas">
+          <Link href="/app" className="cv__cta">{t('landing.hero.cta_primary')}</Link>
+          <span className="cv__live">
+            <span className="cv__pulse" aria-hidden />
+            <strong className="t-num">{liveRows}</strong> registros en vivo · <span className="t-num">{totals.coletas_rows}</span> coletas
           </span>
+        </div>
+        <div className="cv__byline">
+          <span>Publicado por IconsAI</span>
+          <span className="cv__byline-rule" aria-hidden />
+          <span>Asunción · Paraguay</span>
         </div>
       </div>
     </div>
@@ -129,65 +166,71 @@ function SlideVision({ active, totals }: { active: boolean; totals: LandingData[
 }
 
 /* ============================================================
-   Slide 02 — Conversation (demo with REAL BCP rate)
+   II — DIÁLOGO
    ============================================================ */
-function SlideConversation({ active, cotacoes }: { active: boolean; cotacoes: LandingData['cotacoes'] }) {
+function SlideDialogo({ active, cotacoes }: { active: boolean; cotacoes: LandingData['cotacoes'] }) {
   const { t, locale } = useNandutiLocale();
   const usd = cotacoes.find((c) => c.moeda_codigo === 'USD');
-  const realResponse = usd
-    ? `Tu saldo: ${PYG(4_350_000)} + 247,83 USDC. Cotación BCP del ${fmtDayMonth(usd.fecha_planilla, locale)}: ${PYG(usd.valor_pyg)} por dólar.`
+  const aiResponse = usd
+    ? `Tu saldo: ${PYG(4_350_000)} + 247,83 USDC. Cotización BCP del ${fmtDayMonth(usd.fecha_planilla, locale)}: ${PYG(usd.valor_pyg)} por dólar.`
     : t('landing.howitworks.ai_response');
+
   return (
-    <div className={`ndl-cnv ${active ? 'is-active' : ''}`}>
-      <div className="ndl-cnv__inner">
-        <div className="ndl-cnv__left">
-          <span className="ndl-eyebrow">{t('landing.howitworks.eyebrow')}</span>
-          <h2 className="ndl-cnv__h">{t('landing.howitworks.title')}</h2>
-          <p className="ndl-cnv__lead">{t('landing.howitworks.lead')}</p>
-          <ol className="ndl-cnv__steps">
+    <div className={`dlg ${active ? 'is-active' : ''}`}>
+      <SectionHeader roman="II" name={t('landing.howitworks.eyebrow')} right="Demostración · 1 turno" />
+      <div className="dlg__body">
+        <div className="dlg__l">
+          <h2 className="dlg__h">{t('landing.howitworks.title')}</h2>
+          <p className="dlg__lead">{t('landing.howitworks.lead')}</p>
+          <ol className="dlg__steps">
             {(['step1','step2','step3','step4'] as const).map((k, i) => (
-              <li key={k} className="ndl-cnv__step">
-                <span className="ndl-cnv__stepN">0{i+1}</span>
-                <span>{t(`landing.howitworks.${k}`)}</span>
+              <li key={k} className="dlg__step">
+                <span className="dlg__step-n">{(i+1).toString().padStart(2,'0')}</span>
+                <span className="dlg__step-t">{t(`landing.howitworks.${k}`)}</span>
               </li>
             ))}
           </ol>
         </div>
 
-        <div className="ndl-cnv__right">
-          <div className="ndl-chat" role="img" aria-label="conversation demo">
-            <div className="ndl-chat__chrome">
-              <span className="ndl-chat__cdot" />
-              <span className="ndl-chat__cdot" />
-              <span className="ndl-chat__cdot" />
-              <span className="ndl-chat__title">ñandutí · chat</span>
+        <div className="dlg__r">
+          <div className="chat" role="img" aria-label="conversation demo">
+            <div className="chat__chrome">
+              <span className="chat__cdot" />
+              <span className="chat__cdot" />
+              <span className="chat__cdot" />
+              <span className="chat__title">ñandutí · chat</span>
+              <span className="chat__live">live</span>
             </div>
-            <div className="ndl-chat__body">
-              <div className="ndl-chat__row ndl-chat__row--user" style={{ ['--d' as string]: '500ms' } as React.CSSProperties}>
-                <div className="ndl-chat__bub ndl-chat__bub--user">{t('landing.howitworks.user_msg')}</div>
+            <div className="chat__body">
+              <div className="chat__row chat__row--user" style={{ ['--d' as string]: '420ms' } as React.CSSProperties}>
+                <div className="chat__bub chat__bub--user">{t('landing.howitworks.user_msg')}</div>
               </div>
-              <div className="ndl-chat__row" style={{ ['--d' as string]: '1100ms' } as React.CSSProperties}>
-                <span className="ndl-chat__avatar"><Lace size={22} rays={12} rings={3} stroke="#22d3ee" opacity={0.95} /></span>
-                <div className="ndl-chat__bub ndl-chat__bub--thinking">
-                  <span className="ndl-chat__dots"><span /><span /><span /></span>
+              <div className="chat__row" style={{ ['--d' as string]: '980ms' } as React.CSSProperties}>
+                <span className="chat__avatar"><Lace size={22} rays={12} rings={3} stroke="#22d3ee" opacity={0.9} /></span>
+                <div className="chat__bub chat__bub--thinking">
+                  <span className="chat__dots"><span /><span /><span /></span>
                 </div>
               </div>
-              <div className="ndl-tool" style={{ ['--d' as string]: '1700ms' } as React.CSSProperties}>
-                <span className="ndl-tool__lbl">{t('landing.howitworks.tool_call_label')}</span>
-                <code className="ndl-tool__code">
-                  <span className="ndl-tool__fn">wallet</span>.<span className="ndl-tool__fn">balance</span><span className="ndl-tool__p">()</span>
+              <div className="chat__tool" style={{ ['--d' as string]: '1540ms' } as React.CSSProperties}>
+                <span className="chat__tool-lbl">{t('landing.howitworks.tool_call_label')}</span>
+                <code className="chat__code">
+                  <span className="chat__code-fn">wallet</span>.<span className="chat__code-fn">balance</span><span className="chat__code-p">()</span>
                 </code>
-                <span className="ndl-tool__arrow" aria-hidden>→</span>
-                {usd ? (
-                  <code className="ndl-tool__code ndl-tool__out">
-                    {`{ pyg_balance: 4_350_000, usdc_balance: 247.83,`}<br/>
-                    {`  cotacao_usd_pyg: { rate: ${usd.valor_pyg}, fonte: "BCP" } }`}
-                  </code>
-                ) : null}
+                <span className="chat__arrow" aria-hidden>→</span>
+                <div className="chat__out">
+                  {usd ? (
+                    <>
+                      {'{ pyg_balance: 4_350_000, usdc_balance: 247.83,'}<br/>
+                      {`  cotacao_usd_pyg: { rate: ${usd.valor_pyg}, fonte: "BCP" } }`}
+                    </>
+                  ) : (
+                    <>{'{ pyg_balance: 4_350_000, usdc_balance: 247.83 }'}</>
+                  )}
+                </div>
               </div>
-              <div className="ndl-chat__row" style={{ ['--d' as string]: '2400ms' } as React.CSSProperties}>
-                <span className="ndl-chat__avatar"><Lace size={22} rays={12} rings={3} stroke="#22d3ee" opacity={0.95} /></span>
-                <div className="ndl-chat__bub ndl-chat__bub--ai">{realResponse}</div>
+              <div className="chat__row" style={{ ['--d' as string]: '2240ms' } as React.CSSProperties}>
+                <span className="chat__avatar"><Lace size={22} rays={12} rings={3} stroke="#22d3ee" opacity={0.9} /></span>
+                <div className="chat__bub chat__bub--ai">{aiResponse}</div>
               </div>
             </div>
           </div>
@@ -198,159 +241,48 @@ function SlideConversation({ active, cotacoes }: { active: boolean; cotacoes: La
 }
 
 /* ============================================================
-   Slide 03 — Mini-apps with REAL data injected
+   III — CATÁLOGO (numbered magazine TOC)
    ============================================================ */
 const APP_LIST: Array<'wallet'|'gov'|'health'|'edu'|'crypto'|'info'|'alerts'|'police'|'docs'> =
   ['wallet','gov','health','edu','crypto','info','alerts','police','docs'];
 
-function makeMockup(id: string, data: LandingData): React.ReactElement {
-  const { cotacoes, feed, alerts, datasets } = data;
-  const usd = cotacoes.find((c) => c.moeda_codigo === 'USD');
-  const topFeed = feed.slice(0, 3);
-  const topAlert = alerts[0];
-  const topMec = datasets.filter((d) => d.dominio === 'mec')[0];
-
-  switch (id) {
-    case 'wallet': return (
-      <div className="mk mk-w">
-        <span className="mk-w__pyg">{PYG(4_350_000)}</span>
-        <span className="mk-w__usdc">
-          247,83 USDC
-          {usd ? <span className="mk-w__rate">·  {fmtNumDot(usd.valor_pyg)} BCP</span> : null}
-        </span>
-      </div>
-    );
-    case 'gov': {
-      const tramites = ['Renovar cédula', 'Consultar RUC', 'Matrícula MEC'];
-      const titles = topFeed.length > 0 ? [topFeed[0]?.titulo?.slice(0, 30) ?? tramites[0], tramites[1], tramites[2]] : tramites;
-      return (
-        <ul className="mk mk-g">
-          <li><span className="mk-g__chk" /> {titles[0]} <span className="mk-g__min">15m</span></li>
-          <li><span className="mk-g__chk is-on" /> {titles[1]} <span className="mk-g__min">2m</span></li>
-          <li><span className="mk-g__chk" /> {titles[2]} <span className="mk-g__min">8m</span></li>
-        </ul>
-      );
-    }
-    case 'health': return (
-      <div className="mk mk-h">
-        <div className="mk-h__bar">
-          <span className="mk-h__seg s-g" />
-          <span className="mk-h__seg s-a" />
-          <span className="mk-h__seg s-r" />
-          <span className="mk-h__pin" style={{ left: '32%' }} />
-        </div>
-        <div className="mk-h__row"><span>USF Trinidad</span><span className="mk-h__d">1,2km</span></div>
-      </div>
-    );
-    case 'edu': return (
-      <ul className="mk mk-e">
-        <li><span>{topMec ? topMec.titulo.split(' ').slice(0, 2).join(' ').toLowerCase() : 'Lengua'}</span><span className="mk-e__g">4,5</span></li>
-        <li><span>Matemática</span><span className="mk-e__g is-ok">3,8</span></li>
-        <li><span>CCNN</span><span className="mk-e__g">4,2</span></li>
-      </ul>
-    );
-    case 'crypto': return (
-      <div className="mk mk-c">
-        <div className="mk-c__card">
-          <div className="mk-c__chip" />
-          <div className="mk-c__num">···· 4827</div>
-          <div className="mk-c__lbl">Mastercard · USDC</div>
-        </div>
-      </div>
-    );
-    case 'info': {
-      const items = topFeed.length >= 3 ? topFeed : [
-        { titulo: 'Música y danza unen Paraguay y Japón', publicado_em: '2h' },
-        { titulo: 'Paraguay explora innovación agrícola', publicado_em: '5h' },
-        { titulo: 'Adjudicación de tierras en San Pedro', publicado_em: '2d' },
-      ];
-      return (
-        <ul className="mk mk-i mk-i--text">
-          {items.slice(0, 3).map((it, i) => (
-            <li key={i}>
-              <span className="mk-i__title">{it.titulo}</span>
-            </li>
-          ))}
-        </ul>
-      );
-    }
-    case 'alerts': {
-      const a = topAlert;
-      const sevLabel = a?.severity?.toUpperCase() ?? 'WATCH';
-      const region = a?.geo_dpto ?? 'Concepción';
-      const desc = a?.descricao?.slice(0, 50) ?? 'fresco a frío';
-      return (
-        <div className="mk mk-a">
-          <span className="mk-a__pill"><span className="mk-a__pdot" /> {sevLabel} · {region}</span>
-          <div className="mk-a__row"><span>{a?.fonte?.toUpperCase() ?? 'DINAC'}</span><span>{desc}</span></div>
-          <div className="mk-a__row"><span>SEN</span><span>asistencia · Cateura</span></div>
-        </div>
-      );
-    }
-    case 'police': return (
-      <div className="mk mk-p">
-        <div className="mk-p__btn">SOS<span className="mk-p__ring" /></div>
-        <div className="mk-p__d">DEAM · 1,4km</div>
-      </div>
-    );
-    case 'docs': return (
-      <div className="mk mk-d">
-        <div className="mk-d__cards">
-          <span className="mk-d__c s-3" />
-          <span className="mk-d__c s-2" />
-          <span className="mk-d__c s-1">
-            <span className="mk-d__b" style={{ width: '60%' }} />
-            <span className="mk-d__b" style={{ width: '85%' }} />
-          </span>
-        </div>
-        <div className="mk-d__qr">
-          <span /><span /><span /><span /><span /><span /><span /><span /><span />
-        </div>
-      </div>
-    );
-    default: return <div />;
-  }
-}
-
-function SlideApps({ active, data }: { active: boolean; data: LandingData }) {
+function SlideCatalogo({ active }: { active: boolean }) {
   const { t } = useNandutiLocale();
   return (
-    <div className={`ndl-apps ${active ? 'is-active' : ''}`}>
-      <div className="ndl-apps__inner">
-        <header className="ndl-apps__h">
-          <span className="ndl-eyebrow">{t('landing.miniapps.eyebrow')}</span>
-          <h2 className="ndl-apps__t">{t('landing.miniapps.title')}</h2>
-          <p className="ndl-apps__lead">{t('landing.miniapps.lead')}</p>
-        </header>
-        <div className="ndl-apps__grid">
-          {APP_LIST.map((id, i) => {
-            const Icon = APP_ICON[id];
-            return (
-              <article key={id} className="ndl-app" style={{ ['--i' as string]: i } as React.CSSProperties}>
-                <div className="ndl-app__head">
-                  <span className="ndl-app__icn"><Icon width={18} height={18} /></span>
-                  <span className="ndl-app__nm">{t(`sidebar.${id}`)}</span>
-                </div>
-                <div className="ndl-app__mock">{makeMockup(id, data)}</div>
-                <p className="ndl-app__tag">{t(`landing.miniapps.${id}_tag`)}</p>
-              </article>
-            );
-          })}
-        </div>
+    <div className={`cat ${active ? 'is-active' : ''}`}>
+      <SectionHeader roman="III" name={t('landing.miniapps.eyebrow')} right="Servicios del Estado" />
+      <div className="cat__intro">
+        <h2 className="cat__h">{t('landing.miniapps.title')}</h2>
+        <p className="cat__lead">{t('landing.miniapps.lead')}</p>
       </div>
+      <ol className="cat__list">
+        {APP_LIST.map((id, i) => {
+          const Icon = APP_ICON[id];
+          return (
+            <li key={id} className="cat__row" style={{ ['--i' as string]: i } as React.CSSProperties}>
+              <span className="cat__row-n">{(i + 1).toString().padStart(2, '0')}</span>
+              <span className="cat__row-c">
+                <span className="cat__row-name">{t(`sidebar.${id}`)}</span>
+                <span className="cat__row-tag">{t(`landing.miniapps.${id}_tag`)}</span>
+              </span>
+              <span className="cat__row-icn"><Icon width={24} height={24} /></span>
+              <span className="cat__row-arr" aria-hidden>→</span>
+            </li>
+          );
+        })}
+      </ol>
     </div>
   );
 }
 
 /* ============================================================
-   Slide 04 — Live Feed (REAL articles + REAL alerts)
+   IV — DESPACHOS (live magazine: feature + secondary + sidebar)
    ============================================================ */
-function SlideFeed({ active, feed, alerts, cotacoes }: {
+function SlideDespachos({ active, feed, alerts, cotacoes }: {
   active: boolean; feed: LandingData['feed']; alerts: LandingData['alerts']; cotacoes: LandingData['cotacoes'];
 }) {
   const { t, locale } = useNandutiLocale();
-  // "ago" estável em UTC pra evitar hydration mismatch no horário do servidor
-  const NOW_UTC = Date.UTC(2026, 4, 10, 18, 0); // server-stable reference (mai/2026)
+  const NOW_UTC = Date.UTC(2026, 4, 10, 18, 0);
   const ago = (iso: string): string => {
     try {
       const t0 = new Date(iso).getTime();
@@ -362,213 +294,281 @@ function SlideFeed({ active, feed, alerts, cotacoes }: {
       return Math.round(h / 24) + 'd';
     } catch { return ''; }
   };
+
+  const articles = feed.slice(0, 4);
+  const featured = articles[0];
+  const secondary = articles.slice(1, 4);
+
   return (
-    <div className={`ndl-fd ${active ? 'is-active' : ''}`}>
-      <div className="ndl-fd__inner">
-        <header className="ndl-fd__h">
-          <span className="ndl-eyebrow">{t('landing.datasources.eyebrow')}</span>
-          <h2 className="ndl-fd__t">{t('landing.datasources.title')}</h2>
-          <p className="ndl-fd__lead">{t('landing.datasources.lead')}</p>
-        </header>
+    <div className={`dsp ${active ? 'is-active' : ''}`}>
+      <SectionHeader roman="IV" name={t('landing.datasources.eyebrow')} right="Redacción en vivo" />
+      <div className="dsp__body">
+        <section className="dsp__main">
+          <header className="dsp__main-h">
+            <span>Agencia IP · Comunicados oficiales</span>
+            <span className="dsp__main-live">en vivo</span>
+          </header>
 
-        <div className="ndl-fd__cols">
-          {/* Coluna 1: artigos reais Agencia IP / Presidência */}
-          <section className="ndl-fd__col">
-            <header className="ndl-fd__colH">
-              <span className="ndl-mono ndl-fd__src">Agencia IP</span>
-              <span className="ndl-fd__live"><span className="ndl-fd__lpd" />ao vivo</span>
-            </header>
-            <ul className="ndl-fd__list">
-              {feed.slice(0, 5).map((it, i) => (
-                <li key={i} className="ndl-fd__item" style={{ ['--i' as string]: i } as React.CSSProperties}>
-                  <span className="ndl-fd__date ndl-mono">{fmtDayMonth(it.publicado_em, locale)}</span>
-                  <span className="ndl-fd__title">{it.titulo}</span>
-                </li>
-              ))}
-            </ul>
-          </section>
-
-          {/* Coluna 2: DINAC alertas reais */}
-          <section className="ndl-fd__col">
-            <header className="ndl-fd__colH">
-              <span className="ndl-mono ndl-fd__src">DINAC · SEN</span>
-              <span className="ndl-fd__live"><span className="ndl-fd__lpd" />ao vivo</span>
-            </header>
-            <ul className="ndl-fd__list">
-              {alerts.slice(0, 5).map((it, i) => (
-                <li key={i} className="ndl-fd__item ndl-fd__item--alert" style={{ ['--i' as string]: i } as React.CSSProperties}>
-                  <span className={`ndl-fd__sev ndl-fd__sev--${it.severity}`}>{it.severity.toUpperCase()}</span>
-                  <span className="ndl-fd__title">{it.titulo}</span>
-                  <span className="ndl-fd__ago ndl-mono">{ago(it.ts_evento)}</span>
-                </li>
-              ))}
-            </ul>
-
-            {/* Mini ticker BCP cotação real */}
-            <div className="ndl-fd__ticker">
-              <span className="ndl-mono ndl-fd__tickerL">BCP · cotação · ao vivo</span>
-              <div className="ndl-fd__rates">
-                {cotacoes.map((c) => (
-                  <span key={c.moeda_codigo} className="ndl-fd__rate">
-                    <span className="ndl-fd__rateK ndl-mono">{c.moeda_codigo}</span>
-                    <span className="ndl-fd__rateV">{fmtNumDot(c.valor_pyg)}</span>
-                  </span>
-                ))}
+          {featured ? (
+            <article className="art art--feature" style={{ ['--i' as string]: 0 } as React.CSSProperties}>
+              <span className="art__date">{fmtDayMonth(featured.publicado_em, locale)}</span>
+              <div className="art__c">
+                <h3 className="art__h">{featured.titulo}</h3>
+                <div className="art__byline">
+                  <span className="art__byline-by">Por <em>Jazmín Romero</em></span>
+                  <span className="art__byline-sep">/</span>
+                  <span className="art__byline-mono">{featured.oee.replace('_', ' ')}</span>
+                  <span className="art__byline-sep">/</span>
+                  <span className="art__byline-mono">{ago(featured.publicado_em)}</span>
+                  <span className="art__byline-sep">/</span>
+                  <span className="art__byline-mono">{readMins(wordCount(featured.resumo))} min lectura</span>
+                </div>
               </div>
+            </article>
+          ) : null}
+
+          {secondary.map((it, i) => (
+            <article key={it.url_oficial || i} className="art" style={{ ['--i' as string]: i + 1 } as React.CSSProperties}>
+              <span className="art__date">{fmtDayMonth(it.publicado_em, locale)}</span>
+              <div className="art__c">
+                <h3 className="art__h">{it.titulo}</h3>
+                <div className="art__byline">
+                  <span className="art__byline-mono">{it.oee.replace('_', ' ')}</span>
+                  <span className="art__byline-sep">·</span>
+                  <span className="art__byline-mono">{ago(it.publicado_em)}</span>
+                  <span className="art__byline-sep">·</span>
+                  <span className="art__byline-mono">{readMins(wordCount(it.resumo))} min</span>
+                </div>
+              </div>
+            </article>
+          ))}
+        </section>
+
+        <aside className="dsp__side">
+          <section className="dsp__panel">
+            <header className="dsp__panel-h">
+              <span className="dsp__panel-name">Cotización BCP</span>
+              <span className="dsp__panel-meta">{cotacoes[0]?.fecha_planilla ?? '—'}</span>
+            </header>
+            <div className="tickr">
+              {cotacoes.slice(0, 4).map((c) => (
+                <div key={c.moeda_codigo} className="tickr__cell">
+                  <span className="tickr__k">{c.moeda_codigo}</span>
+                  <span className="tickr__v">{fmtNumDot(c.valor_pyg)}</span>
+                </div>
+              ))}
             </div>
           </section>
-        </div>
+
+          <section className="dsp__panel">
+            <header className="dsp__panel-h">
+              <span className="dsp__panel-name">Alertas geo</span>
+              <span className="dsp__panel-meta">DINAC · SEN</span>
+            </header>
+            <ul className="alrt">
+              {alerts.slice(0, 4).map((a, i) => (
+                <li key={i} className="alrt__row">
+                  <span className={`alrt__sev alrt__sev--${a.severity}`}>{a.severity}</span>
+                  <span className="alrt__t">{a.titulo}</span>
+                </li>
+              ))}
+            </ul>
+            {alerts.length > 4 ? (
+              <span className="dsp__more">+ {alerts.length - 4} más</span>
+            ) : null}
+          </section>
+        </aside>
       </div>
     </div>
   );
 }
 
 /* ============================================================
-   Slide 05 — Sources table (with REAL counts from totals)
+   V — INFRAESTRUCTURA (SVG flow diagram)
    ============================================================ */
-function SlideSources({ active, totals }: { active: boolean; totals: LandingData['totals'] }) {
-  const { t } = useNandutiLocale();
-  const SOURCES = [
-    { name: 'Agencia IP',          kind: 'rss',      cron: '30m', rows: totals.feed_rows },
-    { name: 'BCP cotação',         kind: 'scraping', cron: '1h',  rows: totals.bcp_rows },
-    { name: 'SEN feed',            kind: 'rss',      cron: '30m', rows: 10 },
-    { name: 'DINAC pronóstico',    kind: 'scraping', cron: '1h',  rows: totals.alerts_rows - 10 },
-    { name: 'DNCP OCDS',           kind: 'api rest', cron: '1d',  rows: totals.dncp_rows },
-    { name: 'datos.gov.py (DKAN)', kind: 'api rest', cron: '30d', rows: 24 },
-    { name: 'github.com/mecpy',    kind: 'github',   cron: '7d',  rows: 4 },
-  ];
-  return (
-    <div className={`ndl-src ${active ? 'is-active' : ''}`}>
-      <div className="ndl-src__inner">
-        <header className="ndl-src__h">
-          <span className="ndl-eyebrow">{t('landing.architecture.eyebrow')}</span>
-          <h2 className="ndl-src__t">{t('landing.architecture.title')}</h2>
-          <p className="ndl-src__lead">{t('landing.architecture.lead')}</p>
-        </header>
-        <div className="ndl-src__table">
-          <div className="ndl-src__head">
-            <span>{t('landing.datasources.table_source')}</span>
-            <span>{t('landing.datasources.table_kind')}</span>
-            <span>{t('landing.datasources.table_cron')}</span>
-            <span className="ndl-src__r-right">{t('landing.datasources.table_rows')}</span>
-            <span className="ndl-src__r-right">{t('landing.datasources.live')}</span>
-          </div>
-          {SOURCES.map((s, i) => (
-            <div key={s.name} className="ndl-src__row" style={{ ['--i' as string]: i } as React.CSSProperties}>
-              <span className="ndl-src__name">{s.name}</span>
-              <span className="ndl-src__kind">{s.kind}</span>
-              <span className="ndl-src__cron">{s.cron}</span>
-              <span className="ndl-src__rows">{s.rows}</span>
-              <span className="ndl-src__r-right">
-                <span className="ndl-src__live"><span className="ndl-src__pdot" />{t('landing.datasources.live')}</span>
-              </span>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* ============================================================
-   Slide 06 — Manifesto + REAL stats
-   ============================================================ */
-function SlideManifesto({ active, totals }: { active: boolean; totals: LandingData['totals'] }) {
+function SlideInfraestructura({ active, totals }: { active: boolean; totals: LandingData['totals'] }) {
   const { t } = useNandutiLocale();
   const totalRows = totals.feed_rows + totals.bcp_rows + totals.dncp_rows + totals.alerts_rows;
-  const stats = [
+
+  return (
+    <div className={`inf ${active ? 'is-active' : ''}`}>
+      <SectionHeader roman="V" name={t('landing.architecture.eyebrow')} right="Diagrama de flujo · MMXXVI" />
+      <div className="inf__intro">
+        <h2 className="inf__h">{t('landing.architecture.title')}</h2>
+        <p className="inf__lead">{t('landing.architecture.lead')}</p>
+      </div>
+
+      <figure className="inf__fig" aria-label="data flow diagram">
+        <svg className="inf__svg" viewBox="0 0 1180 240" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="ndl-arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" orient="auto">
+              <path d="M0,0 L10,5 L0,10 z" fill="rgba(34,211,238,0.7)" />
+            </marker>
+          </defs>
+
+          {[0, 1, 2, 3].map((idx) => {
+            const x = 24 + idx * 295;
+            const label = ['I · COLECTA', 'II · ALMACÉN', 'III · ORQUESTACIÓN', 'IV · MODELOS'][idx];
+            const headline = ['7 fuentes', `${totalRows} filas`, '28 tools', 'Haiku · Sonnet'][idx];
+            const sub1 = ['Agencia IP · BCP', 'Supabase PG', 'Next.js 15', 'DigitalOcean'][idx];
+            const sub2 = ['DINAC · DNCP', 'RLS · views SQL', 'Redis · MITIC', 'Gradient AI'][idx];
+            const sub3 = ['MEC · SEN · MSPBS', 'audit estoniano', 'cache 300s', '6× más barato'][idx];
+            return (
+              <g key={idx} transform={`translate(${x}, 28)`}>
+                <rect width="270" height="184" rx="6" fill="rgba(20,20,32,0.50)" stroke="rgba(255,255,255,0.10)" />
+                <line x1="0" y1="0" x2="60" y2="0" stroke="rgba(34,211,238,0.85)" strokeWidth="2" />
+                <text x="20" y="34" fontFamily="JetBrains Mono, monospace" fontSize="10" letterSpacing="3" fill="#22d3ee">{label}</text>
+                <text x="20" y="78" fontFamily="Fraunces, serif" fontStyle="italic" fontSize="24" fill="#f5f3ee" fontWeight="350">{headline}</text>
+                <line x1="20" y1="92" x2="80" y2="92" stroke="rgba(255,255,255,0.16)" strokeWidth="1" />
+                <text x="20" y="118" fontFamily="Plus Jakarta Sans, sans-serif" fontSize="12" fill="rgba(245,243,238,0.66)">{sub1}</text>
+                <text x="20" y="138" fontFamily="Plus Jakarta Sans, sans-serif" fontSize="12" fill="rgba(245,243,238,0.66)">{sub2}</text>
+                <text x="20" y="158" fontFamily="Plus Jakarta Sans, sans-serif" fontSize="12" fill="rgba(245,243,238,0.66)">{sub3}</text>
+              </g>
+            );
+          })}
+
+          {/* Arrows between boxes */}
+          {[0, 1, 2].map((idx) => {
+            const x1 = 294 + idx * 295;
+            const x2 = 319 + idx * 295;
+            return (
+              <line
+                key={idx}
+                x1={x1} y1={120}
+                x2={x2} y2={120}
+                stroke="rgba(34,211,238,0.55)" strokeWidth="1.2"
+                markerEnd="url(#ndl-arr)"
+              />
+            );
+          })}
+        </svg>
+      </figure>
+
+      <div className="inf__notes">
+        {([0, 1, 2, 3] as const).map((i) => (
+          <div key={i} className="inf__note" style={{ ['--i' as string]: i } as React.CSSProperties}>
+            <span className="inf__note-n">{(['Colecta autónoma','Banco soberano','Orquestación','Modelos auditables'])[i]}</span>
+            <span className="inf__note-t">{t(`landing.architecture.layer${i+1}_title`)}</span>
+            <span className="inf__note-d">{t(`landing.architecture.layer${i+1}_body`)}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
+   VI — COLOFÓN (manifesto)
+   ============================================================ */
+function SlideColofon({ active, totals }: { active: boolean; totals: LandingData['totals'] }) {
+  const { t } = useNandutiLocale();
+  const totalRows = totals.feed_rows + totals.bcp_rows + totals.dncp_rows + totals.alerts_rows;
+  const stats: Array<{ value: string; label: string }> = [
     { value: String(totalRows), label: t('landing.stats.rows_label') },
     { value: '7',                label: t('landing.stats.workflows_label') },
     { value: '6',                label: t('landing.stats.sources_label') },
     { value: '28',               label: t('landing.stats.tools_label') },
     { value: '5',                label: t('landing.stats.languages_label') },
   ];
+
   return (
-    <div className={`ndl-mfs ${active ? 'is-active' : ''}`}>
-      <div className="ndl-mfs__lace" aria-hidden>
-        <Lace size={620} rays={20} rings={6} stroke="#22d3ee" opacity={0.08} spinSec={180} />
+    <div className={`col ${active ? 'is-active' : ''}`}>
+      <div className="col__seal" aria-hidden>
+        <Lace size={680} rays={20} rings={6} stroke="#22d3ee" opacity={0.07} spinSec={420} />
       </div>
-      <div className="ndl-mfs__inner">
-        <p className="ndl-mfs__quote">
-          <span className="ndl-mfs__q">"</span>
+      <div className="col__inner">
+        <blockquote className="col__quote">
           {t('landing.footer.manifesto')}
-          <span className="ndl-mfs__q">"</span>
-        </p>
-        <div className="ndl-mfs__stats">
+        </blockquote>
+
+        <div className="col__sig">
+          <span className="col__sig-rule" aria-hidden />
+          <span>Manifiesto · IconsAI · MMXXVI</span>
+          <span className="col__sig-rule" aria-hidden />
+        </div>
+
+        <div className="col__stats">
           {stats.map((s, i) => (
-            <div key={i} className="ndl-mfs__cell" style={{ ['--i' as string]: i } as React.CSSProperties}>
-              <span className="ndl-mfs__num">{s.value}</span>
-              <span className="ndl-mfs__lbl">{s.label}</span>
+            <div key={i} className="col__cell">
+              <span className="col__num">{s.value}</span>
+              <span className="col__lbl">{s.label}</span>
             </div>
           ))}
         </div>
-        <div className="ndl-mfs__row">
-          <Link href="/app" className="ndl-mfs__cta">{t('landing.hero.cta_primary')}</Link>
-          <span className="ndl-mfs__credit">{t('landing.footer.credit')}</span>
+
+        <div className="col__row">
+          <Link href="/app" className="col__cta">{t('landing.hero.cta_primary')}</Link>
+          <span className="col__credit">{t('landing.footer.credit')}</span>
         </div>
       </div>
+      <span className="col__roman" aria-hidden>VI</span>
     </div>
   );
 }
 
 /* ============================================================
-   Pager
+   Footer · colophon · pager (Roman numerals)
    ============================================================ */
-function Pager({ active, total, paused, onJump, onTogglePause, slideName }: {
+function Foot({ active, total, paused, onJump, onTogglePause, slideName }: {
   active: number; total: number; paused: boolean; onJump: (i: number) => void; onTogglePause: () => void; slideName: string;
 }) {
   return (
-    <div className="ndl-pgr" role="group" aria-label="presentation navigation">
-      <div className="ndl-pgr__inner">
-        <div className="ndl-pgr__count">
-          <span className="ndl-pgr__cur">{(active + 1).toString().padStart(2,'0')}</span>
-          <span className="ndl-pgr__sl">/</span>
-          <span>{total.toString().padStart(2,'0')}</span>
-          <span className="ndl-pgr__lbl">·  {slideName}</span>
-        </div>
+    <footer className="foot" role="group" aria-label="presentation navigation">
+      <div className="foot__l">
+        <span className="foot__lbl">
+          <span className="foot__cur t-num">{(active + 1).toString().padStart(2, '0')}</span>
+          <span className="foot__sl">/</span>
+          <span className="t-num">{total.toString().padStart(2, '0')}</span>
+        </span>
+        <span className="foot__lbl foot__sec">{slideName}</span>
+      </div>
 
-        <div className="ndl-pgr__dots">
-          {Array.from({ length: total }, (_, i) => {
-            const isA = i === active;
-            return (
-              <button
-                key={i}
-                type="button"
-                className={`ndl-pgr__dot ${isA ? 'is-active' : ''}`}
-                onClick={() => onJump(i)}
-                aria-label={`Slide ${i + 1}`}
-                aria-current={isA ? 'true' : undefined}
-              >
-                <span className="ndl-pgr__bar">
-                  {isA ? <span className="ndl-pgr__fill" style={{ animationPlayState: paused ? 'paused' : 'running' }} /> : null}
-                </span>
-              </button>
-            );
-          })}
-        </div>
+      <div className="foot__c">
+        <nav className="foot__rom" aria-label="slides">
+          {ROMANS.slice(0, total).map((r, i) => (
+            <button
+              key={r}
+              type="button"
+              className={`foot__rd ${i === active ? 'is-active' : ''}`}
+              aria-label={`Slide ${i + 1} (${r})`}
+              aria-current={i === active ? 'true' : undefined}
+              onClick={() => onJump(i)}
+              style={{ animationPlayState: paused ? 'paused' : 'running' }}
+            >
+              {r}
+            </button>
+          ))}
+        </nav>
+      </div>
 
-        <div className="ndl-pgr__ctrl">
-          <button type="button" className="ndl-pgr__btn" onClick={() => onJump((active - 1 + total) % total)} aria-label="previous">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M11 5l-7 7 7 7" /></svg>
+      <div className="foot__r">
+        <div className="foot__ctrl">
+          <button type="button" className="foot__btn" onClick={() => onJump((active - 1 + total) % total)} aria-label="previous">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M11 5l-7 7 7 7" /></svg>
           </button>
-          <button type="button" className="ndl-pgr__btn ndl-pgr__btn--play" onClick={onTogglePause} aria-label={paused ? 'play' : 'pause'}>
-            {paused ? (
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4l13 8-13 8V4z" /></svg>
-            ) : (
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M6 4h4v16H6zM14 4h4v16h-4z" /></svg>
-            )}
+          <button type="button" className="foot__btn" onClick={onTogglePause} aria-label={paused ? 'play' : 'pause'}>
+            {paused
+              ? <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4l13 8-13 8V4z" /></svg>
+              : <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M6 4h4v16H6zM14 4h4v16h-4z" /></svg>
+            }
           </button>
-          <button type="button" className="ndl-pgr__btn" onClick={() => onJump((active + 1) % total)} aria-label="next">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M13 5l7 7-7 7" /></svg>
+          <button type="button" className="foot__btn" onClick={() => onJump((active + 1) % total)} aria-label="next">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M13 5l7 7-7 7" /></svg>
           </button>
         </div>
       </div>
-    </div>
+    </footer>
   );
 }
 
+function FootWithI18n(props: { active: number; total: number; paused: boolean; onJump: (i: number) => void; onTogglePause: () => void }) {
+  const { t } = useNandutiLocale();
+  const id = SLIDES[props.active];
+  return <Foot {...props} slideName={t(`landing.slides.${id === 'cover' ? 'vision' : id === 'dialogo' ? 'conversation' : id === 'catalogo' ? 'apps' : id === 'despachos' ? 'feed' : id === 'infraestructura' ? 'sources' : 'manifesto'}`)} />;
+}
+
 /* ============================================================
-   Composer principal
+   Composer
    ============================================================ */
 export default function LandingDeck({ data }: { data: LandingData }) {
   const [active, setActive] = useState(0);
@@ -611,33 +611,27 @@ export default function LandingDeck({ data }: { data: LandingData }) {
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
-      <TopBar />
+      <Masthead />
 
-      <div className="ndl-stage" role="region" aria-roledescription="carousel" aria-label="Ñandutí presentation">
+      <div className="stage" role="region" aria-roledescription="carousel" aria-label="Ñandutí almanaque">
         {SLIDES.map((id, i) => {
           const isA = i === active;
           const isP = i === prevIdx;
-          const cls = `ndl-slide ${isA ? 'is-active' : ''} ${isP ? 'is-prev' : ''}`;
+          const cls = `slide ${isA ? 'is-active' : ''} ${isP ? 'is-prev' : ''}`;
           return (
             <section key={id} className={cls} aria-hidden={!isA} data-slide={id}>
-              {id === 'vision'        ? <SlideVision        active={isA} totals={data.totals} /> : null}
-              {id === 'conversation'  ? <SlideConversation  active={isA} cotacoes={data.cotacoes} /> : null}
-              {id === 'apps'          ? <SlideApps          active={isA} data={data} /> : null}
-              {id === 'feed'          ? <SlideFeed          active={isA} feed={data.feed} alerts={data.alerts} cotacoes={data.cotacoes} /> : null}
-              {id === 'sources'       ? <SlideSources       active={isA} totals={data.totals} /> : null}
-              {id === 'manifesto'     ? <SlideManifesto     active={isA} totals={data.totals} /> : null}
+              {id === 'cover'           ? <SlideCover           active={isA} totals={data.totals} /> : null}
+              {id === 'dialogo'         ? <SlideDialogo         active={isA} cotacoes={data.cotacoes} /> : null}
+              {id === 'catalogo'        ? <SlideCatalogo        active={isA} /> : null}
+              {id === 'despachos'       ? <SlideDespachos       active={isA} feed={data.feed} alerts={data.alerts} cotacoes={data.cotacoes} /> : null}
+              {id === 'infraestructura' ? <SlideInfraestructura active={isA} totals={data.totals} /> : null}
+              {id === 'colofon'         ? <SlideColofon         active={isA} totals={data.totals} /> : null}
             </section>
           );
         })}
       </div>
 
-      <PagerWithI18n active={active} total={total} paused={paused} onJump={goTo} onTogglePause={() => setPaused((p) => !p)} />
+      <FootWithI18n active={active} total={total} paused={paused} onJump={goTo} onTogglePause={() => setPaused((p) => !p)} />
     </main>
   );
-}
-
-function PagerWithI18n(props: { active: number; total: number; paused: boolean; onJump: (i: number) => void; onTogglePause: () => void }) {
-  const { t } = useNandutiLocale();
-  const id = SLIDES[props.active];
-  return <Pager {...props} slideName={t(`landing.slides.${id}`)} />;
 }
