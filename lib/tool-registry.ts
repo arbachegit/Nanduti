@@ -16,6 +16,9 @@ import { mockDocs, mockShare } from '@/data/mock-docs';
 import { SEED_AUDIT } from './audit-logger';
 import { mockDelay } from './mock-delay';
 import { validateCedula } from './cedula-validator';
+import * as dsInfo from './data-source/info';
+import * as dsAlerts from './data-source/alerts';
+import * as dsWallet from './data-source/wallet';
 
 export interface ToolDef {
   name: string;
@@ -50,7 +53,18 @@ export const TOOLS: ToolDef[] = [
     handler: async (i) => { await mockDelay(JSON.stringify(i)); return { ok: true, citizen: mockCitizen, source: 'identidad-electronica-mitic' }; },
   }),
 
-  tool({ name: 'wallet.balance', description: 'Devuelve saldo PYG y USDC.', miniapp: 'wallet', input_schema: { type: 'object', properties: {} }, handler: async () => { await mockDelay('wallet.balance'); return mockWallet; } }),
+  tool({ name: 'wallet.balance', description: 'Devuelve saldo PYG y USDC.', miniapp: 'wallet', input_schema: { type: 'object', properties: {} }, handler: async () => {
+    await mockDelay('wallet.balance');
+    const cot = await dsWallet.getCotacao('USD');
+    if (cot) {
+      return {
+        ...mockWallet,
+        cotacao_usd_pyg: { rate: cot.valor_pyg / cot.unidade, fecha: cot.fecha_planilla, fonte: 'BCP' },
+        usdc_em_pyg: Math.round((mockWallet.usdc_balance / cot.unidade) * cot.valor_pyg),
+      };
+    }
+    return mockWallet;
+  } }),
   tool({ name: 'wallet.transfer', description: 'Transferencia P2P en guaraníes (mock SIP-BCP).', miniapp: 'wallet', input_schema: { type: 'object', properties: { to: { type: 'string' }, amount: { type: 'number' }, concept: { type: 'string' } }, required: ['to', 'amount'] }, handler: async (i) => { await mockDelay(JSON.stringify(i)); return mockTransfer(String(i.to), Number(i.amount), String(i.concept ?? '')); } }),
   tool({ name: 'wallet.qr_pay', description: 'Pago QR Hub BCP. Cicla 3 comercios.', miniapp: 'wallet', input_schema: { type: 'object', properties: { qr_seed: { type: 'string' } } }, handler: async (i) => { await mockDelay(JSON.stringify(i)); return mockQRPayment(String(i.qr_seed ?? Date.now())); } }),
   tool({ name: 'wallet.history', description: 'Histórico de transacciones recientes.', miniapp: 'wallet', input_schema: { type: 'object', properties: { limit: { type: 'number' } } }, handler: async (i) => { await mockDelay('wallet.history'); return { items: walletHistory(Number(i.limit ?? 20)) }; } }),
@@ -71,11 +85,26 @@ export const TOOLS: ToolDef[] = [
   tool({ name: 'crypto.topup', description: 'Recarga USDC desde saldo PYG (mock Circle/Ueno).', miniapp: 'crypto', input_schema: { type: 'object', properties: { amount_pyg: { type: 'number' } }, required: ['amount_pyg'] }, handler: async (i) => { await mockDelay(JSON.stringify(i)); return mockTopup(Number(i.amount_pyg ?? 0)); } }),
   tool({ name: 'crypto.toggle_lock', description: 'Bloquea/desbloquea Mastercard USDC.', miniapp: 'crypto', input_schema: { type: 'object', properties: { lock: { type: 'boolean' } }, required: ['lock'] }, handler: async (i) => { await mockDelay(JSON.stringify(i)); return { ok: true, locked: !!i.lock, last4: '4827' }; } }),
 
-  tool({ name: 'info.feed', description: 'Feed curado de comunicados oficiales.', miniapp: 'info', input_schema: { type: 'object', properties: { category: { type: 'string' }, limit: { type: 'number' } } }, handler: async (i) => { await mockDelay(JSON.stringify(i)); const list = mockInfoFeed.filter((x) => !i.category || x.category === i.category); return { items: list.slice(0, Number(i.limit ?? 10)) }; } }),
+  tool({ name: 'info.feed', description: 'Feed curado de comunicados oficiales (Agencia IP + SEN reais).', miniapp: 'info', input_schema: { type: 'object', properties: { category: { type: 'string' }, limit: { type: 'number' } } }, handler: async (i) => {
+    await mockDelay(JSON.stringify(i));
+    const real = await dsInfo.listFeed({ category: i.category as string | undefined, limit: Number(i.limit ?? 10) });
+    if (real && real.length > 0) return { items: real, source: 'supabase' };
+    const list = mockInfoFeed.filter((x) => !i.category || x.category === i.category);
+    return { items: list.slice(0, Number(i.limit ?? 10)), source: 'mock' };
+  } }),
   tool({ name: 'info.weekly_summary', description: 'Resumen semanal IA del feed oficial.', miniapp: 'info', input_schema: { type: 'object', properties: { lang: { type: 'string' } } }, handler: async (i) => { await mockDelay('weekly'); return mockWeeklySummary(String(i.lang ?? 'jopara')); } }),
 
   tool({ name: 'alerts.subscribe', description: 'Subscripción geo + categorías SEN/DINAC.', miniapp: 'alerts', input_schema: { type: 'object', properties: { categories: { type: 'array', items: { type: 'string' } }, geo: { type: 'string' } } }, handler: async (i) => { await mockDelay(JSON.stringify(i)); return mockSubscribe(Array.isArray(i.categories) ? (i.categories as string[]) : [], String(i.geo ?? 'Asunción')); } }),
-  tool({ name: 'alerts.recent', description: 'Alertas recientes geolocalizadas.', miniapp: 'alerts', input_schema: { type: 'object', properties: { limit: { type: 'number' } } }, handler: async (i) => { await mockDelay('alerts.recent'); return { items: mockAlerts.slice(0, Number(i.limit ?? 10)) }; } }),
+  tool({ name: 'alerts.recent', description: 'Alertas recientes geolocalizadas (SEN + DINAC reais).', miniapp: 'alerts', input_schema: { type: 'object', properties: { limit: { type: 'number' }, severity: { type: 'string' }, geo: { type: 'string' } } }, handler: async (i) => {
+    await mockDelay('alerts.recent');
+    const real = await dsAlerts.listAlerts({
+      limit: Number(i.limit ?? 10),
+      severity: i.severity as 'info' | 'watch' | 'severe' | 'extreme' | undefined,
+      geo: i.geo as string | undefined,
+    });
+    if (real && real.length > 0) return { items: real, source: 'supabase' };
+    return { items: mockAlerts.slice(0, Number(i.limit ?? 10)), source: 'mock' };
+  } }),
 
   tool({ name: 'police.complaint', description: 'Denuncia online. Audit aislado en modo discreto.', miniapp: 'police', input_schema: { type: 'object', properties: { type: { type: 'string' }, body: { type: 'string' }, discrete: { type: 'boolean' } }, required: ['type'] }, handler: async (i) => { await mockDelay(JSON.stringify(i)); return mockComplaint(String(i.type), String(i.body ?? ''), !!i.discrete); } }),
   tool({ name: 'police.panic', description: 'Botón pánico. Despacha 911 + 137 + DEAM más cercana.', miniapp: 'police', input_schema: { type: 'object', properties: { lat: { type: 'number' }, lng: { type: 'number' } } }, handler: async (i) => { await mockDelay('panic'); return mockPanic(Number(i.lat ?? mockCitizen.geo.lat), Number(i.lng ?? mockCitizen.geo.lng)); } }),
