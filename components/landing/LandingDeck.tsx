@@ -328,7 +328,7 @@ function SlideApps({ active, data }: { active: boolean; data: LandingData }) {
             return (
               <article key={id} className="ndl-app" style={{ ['--i' as string]: i } as React.CSSProperties}>
                 <div className="ndl-app__head">
-                  <span className="ndl-app__icn"><Icon width={22} height={22} /></span>
+                  <span className="ndl-app__icn"><Icon width={18} height={18} /></span>
                   <span className="ndl-app__nm">{t(`sidebar.${id}`)}</span>
                 </div>
                 <div className="ndl-app__mock">{makeMockup(id, data)}</div>

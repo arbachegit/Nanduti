@@ -304,22 +304,42 @@
 .ndl-app {
   background: rgba(20,20,32,0.55);
   border: 1px solid var(--ndl-line);
-  border-radius: 14px;
-  padding: 18px 20px;
-  min-height: 184px;
-  display: flex; flex-direction: column; gap: 12px;
+  border-radius: 12px;
+  padding: 14px 16px;
+  min-height: 152px;
+  display: flex; flex-direction: column; gap: 10px;
   opacity: 0; transform: translateY(14px);
   transition: border-color 220ms ease, transform 220ms ease, background 220ms ease;
 }
 .is-active .ndl-app { animation: ndl-up-sm 600ms ease-out forwards; animation-delay: calc(180ms + var(--i, 0) * 50ms); }
 .ndl-app:hover { border-color: rgba(34,211,238,0.32); transform: translateY(-3px); background: rgba(20,20,32,0.78); }
 .ndl-app:hover .ndl-app__icn { color: var(--ndl-cyan); }
-.ndl-app__head { display: flex; align-items: center; gap: 12px; }
-.ndl-app__icn { color: var(--ndl-cyan); opacity: 0.72; display: inline-flex; transition: opacity 220ms ease; }
-.ndl-app:hover .ndl-app__icn { opacity: 1; }
-.ndl-app__nm { font-family: var(--ndl-display); font-style: italic; font-weight: 400; font-size: 19px; letter-spacing: -0.01em; color: var(--ndl-fg); }
-.ndl-app__mock { flex: 1; min-height: 56px; display: flex; padding: 2px 0 6px; }
-.ndl-app__tag { font-family: var(--ndl-mono); font-size: 10px; line-height: 1.45; color: rgba(245,245,247,0.46); padding-top: 8px; border-top: 1px dashed var(--ndl-line); }
+.ndl-app__head { display: flex; align-items: center; gap: 11px; }
+.ndl-app__icn {
+  width: 36px; height: 36px;
+  border-radius: 9px;
+  background: rgba(34,211,238,0.08);
+  border: 1px solid rgba(34,211,238,0.18);
+  color: var(--ndl-cyan);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  transition: background 220ms ease, border-color 220ms ease, transform 220ms ease;
+}
+.ndl-app__icn :global(svg) { width: 18px; height: 18px; }
+.ndl-app:hover .ndl-app__icn {
+  background: rgba(34,211,238,0.14);
+  border-color: rgba(34,211,238,0.35);
+  transform: scale(1.04);
+}
+.ndl-app__nm {
+  font-family: var(--ndl-display); font-style: italic; font-weight: 400;
+  font-size: 18px; letter-spacing: -0.01em; color: var(--ndl-fg);
+  line-height: 1.15;
+}
+.ndl-app__mock { flex: 1; min-height: 48px; display: flex; padding: 0; }
+.ndl-app__tag { font-family: var(--ndl-mono); font-size: 9.5px; line-height: 1.4; color: rgba(245,245,247,0.42); padding-top: 7px; border-top: 1px dashed var(--ndl-line); }
 
 /* Micro-mockups — abstract CSS representations of each mini-app */
 .mk { width: 100%; display: flex; flex-direction: column; }
