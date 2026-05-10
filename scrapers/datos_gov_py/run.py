@@ -59,6 +59,17 @@ DOMAINS = [
             "alcantarillado-sanitario",
         ],
     },
+    {
+        "domain": "mitic_pug",
+        "fonte_nome": "paraguay_gov_oees",
+        "raw_table": "raw_paraguay_gov",
+        "keywords": [
+            "instituciones-del-portal-unico-de-gobierno",
+            "servicios-publicos-del-portal-paraguay",
+            "instituciones-del-portal-de-gobernaciones",
+            "instituciones-adheridas-al-portal-de-acceso-la-información-pública",
+        ],
+    },
 ]
 
 
