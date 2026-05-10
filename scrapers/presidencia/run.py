@@ -30,21 +30,23 @@ log = logging.getLogger("presidencia")
 logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s %(message)s")
 
 RAW_TABLE = "raw_presidencia_feed"
+RAW_TABLE_GACETA = "raw_gaceta_oficial"
 
-SOURCES: list[tuple[str, Callable[[], list[dict]]]] = [
-    (agencia_ip.FONTE_NOME, agencia_ip.fetch),
-    (decretos.FONTE_NOME, decretos.fetch),
-    (gaceta_oficial.FONTE_NOME, gaceta_oficial.fetch),
+# (fonte_nome, fetch_fn, raw_table) — gaceta tem tabela própria
+SOURCES: list[tuple[str, Callable[[], list[dict]], str]] = [
+    (agencia_ip.FONTE_NOME, agencia_ip.fetch, RAW_TABLE),
+    (decretos.FONTE_NOME, decretos.fetch, RAW_TABLE),
+    (gaceta_oficial.FONTE_NOME, gaceta_oficial.fetch, RAW_TABLE_GACETA),
 ]
 
 
-def _persist(sb, items: list[dict]) -> tuple[int, int]:
+def _persist(sb, items: list[dict], raw_table: str) -> tuple[int, int]:
     """Retorna (novos, duplicados)."""
     novos = dups = 0
     for item in items:
         sha = sha256_payload(item)
-        link = item.get("link", "")
-        result = upsert_raw(sb, RAW_TABLE, link, item, sha)
+        link = item.get("link") or item.get("detalhe_url") or ""
+        result = upsert_raw(sb, raw_table, link, item, sha)
         if result.get("inserted", 0) > 0:
             novos += 1
         else:
@@ -58,7 +60,7 @@ def run() -> int:
     sb = None if dry else server_client()
     fail_count = 0
 
-    for fonte_nome, fetch_fn in SOURCES:
+    for fonte_nome, fetch_fn, raw_table in SOURCES:
         log.info("source=%s starting", fonte_nome)
         try:
             items = fetch_fn()
@@ -84,7 +86,7 @@ def run() -> int:
             continue
 
         try:
-            novos, dups = _persist(sb, items)
+            novos, dups = _persist(sb, items, raw_table)
             log.info("source=%s persisted novos=%d dups=%d", fonte_nome, novos, dups)
             fid = fonte_id_por_nome(sb, fonte_nome)
             if fid:
