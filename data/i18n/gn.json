@@ -1,5 +1,6 @@
 {
   "app": { "name": "Ñandutí", "tagline": "Ne Paraguái, peteĩ ñomongetápe." },
+  "common": { "close": "Mboty", "logout": "Esẽ", "loading": "Oikohína…", "confirmed": "Oĩma", "code_label": "Papyha" },
   "hero": {
     "title": "Ñandutí",
     "subtitle": "Ne Paraguái, peteĩ ñomongetápe.",
@@ -65,9 +66,13 @@
     "tab_qr": "QR Hub",
     "tab_history": "Tembiasakue",
     "to_label": "Avápe",
+    "to_placeholder": "Téra térã kuatia",
     "amount_label": "Mboy (Gs.)",
+    "amount_placeholder": "100.000",
     "concept_label": "Mba'erã",
+    "concept_placeholder": "Karu óga",
     "send_btn": "Mbohasa",
+    "confirm_pay_btn": "Embohovái mbohasa",
     "scan_qr": "QR ehecha",
     "success": "Oĩma, Gs. {amount} oñembou",
     "error_balance": "Viru ndahetái",
@@ -76,6 +81,11 @@
   "gov": {
     "title": "Tetã rembiapokuéra",
     "search_placeholder": "Eheka tembiapo…",
+    "ruc_placeholder": "80012345-6",
+    "search_btn": "Eheka",
+    "ruc_razon": "Térã ñembyaty",
+    "ruc_estado": "Tekoha",
+    "ruc_regimen": "Régimen",
     "duration": "{min} min",
     "free": "Sin sambyhy",
     "digital": "100% digital",
@@ -89,7 +99,9 @@
     "tab_book": "Turno USF",
     "tab_vaccine": "Vacuna óga",
     "symptoms_label": "Ere chéve mba'épa reñeñandu",
+    "symptoms_placeholder": "Áreko akãnundu ha akã rasy pyhare guive…",
     "ask": "Porandu",
+    "book_btn": "Eipichy turno",
     "level_verde": "Mbegue",
     "level_amarillo": "Eñatende",
     "level_rojo": "Sãso",
@@ -105,7 +117,9 @@
     "subject_score": "Pa'ũ",
     "attendance": "Oime jave",
     "tutor_topic_label": "Mba'épa reikuaase ko ára?",
-    "tutor_ask": "Eipuka chéve"
+    "tutor_topic_placeholder": "papyha, ñe'ẽ, papapy…",
+    "tutor_ask": "Eipuka chéve",
+    "enroll_btn": "Embohovái matrícula"
   },
   "crypto": {
     "title": "Kuatia USDC",
@@ -114,6 +128,7 @@
     "rate": "1 USDC = Gs. {rate}",
     "topup": "Embojuruja",
     "topup_label": "Mboy Gs.",
+    "topup_placeholder": "500.000",
     "lock": "Embotĩ kuatia",
     "unlock": "Embojuruja",
     "disclaimer": "Stablecoin USDC ha'e mba'erepy virtual jehechauka. Marco regulatorio paraguáipe oĩ."
@@ -142,6 +157,10 @@
     "discrete": "Modo discreto",
     "discrete_intro": "Reikotevẽ remokañy: epoko modo discreto. Osẽ calculadora-pe. Eju jey haguã: 7 epoko display-pe.",
     "complaint_type": "Mba'éichagua",
+    "complaint_type_violencia": "Tekoasy óga-pe",
+    "complaint_type_robo": "Mondaha",
+    "complaint_type_acoso": "Acoso",
+    "complaint_type_estafa": "Estafa digital",
     "complaint_body": "Ere mba'épa oiko",
     "submit": "Mondo denuncia",
     "submitted": "Ojeguereko. Ehenói 911 ndoroavýi ramo.",

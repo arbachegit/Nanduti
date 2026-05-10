@@ -1,5 +1,6 @@
 {
   "app": { "name": "Ñandutí", "tagline": "O seu Paraguai, numa conversa." },
+  "common": { "close": "Fechar", "logout": "Sair", "loading": "Carregando…", "confirmed": "Confirmado", "code_label": "Código" },
   "hero": {
     "title": "Ñandutí",
     "subtitle": "O seu Paraguai, numa conversa.",
@@ -65,9 +66,13 @@
     "tab_qr": "QR Hub",
     "tab_history": "Histórico",
     "to_label": "Destinatário",
+    "to_placeholder": "Nome ou cédula",
     "amount_label": "Valor (Gs.)",
+    "amount_placeholder": "100.000",
     "concept_label": "Motivo",
+    "concept_placeholder": "Almoço família",
     "send_btn": "Transferir",
+    "confirm_pay_btn": "Confirmar pagamento",
     "scan_qr": "Ler QR",
     "success": "Pronto, Gs. {amount} enviados",
     "error_balance": "Saldo insuficiente",
@@ -76,6 +81,11 @@
   "gov": {
     "title": "Trâmites do Estado",
     "search_placeholder": "Buscar um trâmite…",
+    "ruc_placeholder": "80012345-6",
+    "search_btn": "Buscar",
+    "ruc_razon": "Razão social",
+    "ruc_estado": "Estado",
+    "ruc_regimen": "Regime",
     "duration": "{min} min",
     "free": "Grátis",
     "digital": "100% digital",
@@ -89,7 +99,9 @@
     "tab_book": "USF",
     "tab_vaccine": "Vacinas família",
     "symptoms_label": "Conte o que sente",
+    "symptoms_placeholder": "Tenho febre e dor de cabeça desde ontem à noite…",
     "ask": "Consultar",
+    "book_btn": "Marcar consulta",
     "level_verde": "Leve",
     "level_amarillo": "Atenção",
     "level_rojo": "Emergência",
@@ -105,7 +117,9 @@
     "subject_score": "Nota",
     "attendance": "Presença",
     "tutor_topic_label": "O que quer aprender hoje?",
-    "tutor_ask": "Explique"
+    "tutor_topic_placeholder": "multiplicação, leitura, números…",
+    "tutor_ask": "Explique",
+    "enroll_btn": "Confirmar matrícula"
   },
   "crypto": {
     "title": "Cartão USDC",
@@ -114,6 +128,7 @@
     "rate": "1 USDC = Gs. {rate}",
     "topup": "Recarregar",
     "topup_label": "Valor em Gs.",
+    "topup_placeholder": "500.000",
     "lock": "Bloquear cartão",
     "unlock": "Desbloquear",
     "disclaimer": "USDC é ativo virtual experimental. Sujeito ao marco regulatório paraguaio em formação."
@@ -142,6 +157,10 @@
     "discrete": "Modo discreto",
     "discrete_intro": "Se precisar esconder esta tela rápido, ative o modo discreto. Sai como calculadora. Para voltar: 7 toques no display.",
     "complaint_type": "Tipo de fato",
+    "complaint_type_violencia": "Violência familiar",
+    "complaint_type_robo": "Roubo / furto",
+    "complaint_type_acoso": "Assédio",
+    "complaint_type_estafa": "Golpe digital",
     "complaint_body": "Conte o que aconteceu",
     "submit": "Enviar denúncia",
     "submitted": "Recebido. Ligue 911 se for urgente.",

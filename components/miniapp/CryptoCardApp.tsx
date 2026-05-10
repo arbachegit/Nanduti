@@ -61,7 +61,7 @@ export default function CryptoCardApp() {
       <section className="nd-card cry__topup">
         <span className="nd-eyebrow">{t('crypto.topup')}</span>
         <div className="cry__row">
-          <input className="nd-input nd-mono" value={topupAmt} onChange={(e) => setTopupAmt(e.target.value)} placeholder="500.000" inputMode="numeric" />
+          <input className="nd-input nd-mono" value={topupAmt} onChange={(e) => setTopupAmt(e.target.value)} placeholder={t('crypto.topup_placeholder')} inputMode="numeric" />
           <button type="button" className="nd-btn nd-btn--primary" onClick={doTopup} disabled={!topupAmt}>+ USDC</button>
         </div>
         {topupResult ? (

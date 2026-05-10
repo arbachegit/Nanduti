@@ -52,14 +52,14 @@ export default function PoliceApp({ onDiscrete }: { onDiscrete: () => void }) {
       </section>
 
       <form className="nd-card pol__form" onSubmit={(e) => { e.preventDefault(); submit(); }}>
-        <span className="nd-eyebrow">Denuncia online</span>
+        <span className="nd-eyebrow">{t('police.title')}</span>
         <label><span>{t('police.complaint_type')}</span>
           <select className="nd-input" value={type} onChange={(e) => setType(e.target.value)}>
             <option value="">—</option>
-            <option value="violencia">Violencia familiar</option>
-            <option value="robo">Robo / hurto</option>
-            <option value="acoso">Acoso</option>
-            <option value="estafa">Estafa digital</option>
+            <option value="violencia">{t('police.complaint_type_violencia')}</option>
+            <option value="robo">{t('police.complaint_type_robo')}</option>
+            <option value="acoso">{t('police.complaint_type_acoso')}</option>
+            <option value="estafa">{t('police.complaint_type_estafa')}</option>
           </select>
         </label>
         <label><span>{t('police.complaint_body')}</span>

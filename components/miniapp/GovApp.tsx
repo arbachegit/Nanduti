@@ -44,9 +44,9 @@ export default function GovApp() {
 
       {booking?.tramite ? (
         <div className="gov__confirm nd-card">
-          <span className="nd-pill nd-pill--success">Confirmado</span>
+          <span className="nd-pill nd-pill--success">{t('common.confirmed')}</span>
           <strong>{booking.tramite.name}</strong>
-          <span className="nd-mono">Código: {booking.code}</span>
+          <span className="nd-mono">{t('common.code_label')}: {booking.code}</span>
         </div>
       ) : null}
 
@@ -55,16 +55,16 @@ export default function GovApp() {
       <div className="gov__ruc nd-card">
         <span className="nd-eyebrow">{t('gov.ruc_lookup')}</span>
         <div className="gov__ruc_row">
-          <input className="nd-input nd-mono" placeholder="4521846-2" value={ruc} onChange={(e) => setRuc(e.target.value)} />
+          <input className="nd-input nd-mono" placeholder={t('gov.ruc_placeholder')} value={ruc} onChange={(e) => setRuc(e.target.value)} />
           <button type="button" className="nd-btn" onClick={async () => { const r = await callTool<{ ok: boolean; razon_social: string | null; estado: string; regimen: string | null }>('gov.ruc_lookup', { ruc }); setRucResult(r); }}>
-            Buscar
+            {t('gov.search_btn')}
           </button>
         </div>
         {rucResult ? (
           <ul className="gov__ruc_res">
-            <li><dt>Razón social</dt><dd>{rucResult.razon_social ?? '—'}</dd></li>
-            <li><dt>Estado</dt><dd className={rucResult.estado === 'ACTIVO' ? 'is-ok' : ''}>{rucResult.estado}</dd></li>
-            <li><dt>Régimen</dt><dd>{rucResult.regimen ?? '—'}</dd></li>
+            <li><dt>{t('gov.ruc_razon')}</dt><dd>{rucResult.razon_social ?? '—'}</dd></li>
+            <li><dt>{t('gov.ruc_estado')}</dt><dd className={rucResult.estado === 'ACTIVO' ? 'is-ok' : ''}>{rucResult.estado}</dd></li>
+            <li><dt>{t('gov.ruc_regimen')}</dt><dd>{rucResult.regimen ?? '—'}</dd></li>
           </ul>
         ) : null}
       </div>

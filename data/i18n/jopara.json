@@ -1,5 +1,6 @@
 {
   "app": { "name": "Ñandutí", "tagline": "Ne Paraguái, peteĩ conversación-pe." },
+  "common": { "close": "Cerrar", "logout": "Cerrar sesión", "loading": "Oikohína…", "confirmed": "Confirmado", "code_label": "Código" },
   "hero": {
     "title": "Ñandutí",
     "subtitle": "Ne Paraguái, peteĩ conversación-pe.",
@@ -65,9 +66,13 @@
     "tab_qr": "QR Hub",
     "tab_history": "Tembiasakue",
     "to_label": "Avápe",
+    "to_placeholder": "Nombre térã cédula",
     "amount_label": "Monto (Gs.)",
+    "amount_placeholder": "100.000",
     "concept_label": "Concepto",
+    "concept_placeholder": "Almuerzo familia",
     "send_btn": "Mbohasa",
+    "confirm_pay_btn": "Confirmar pago",
     "scan_qr": "Escanear QR",
     "success": "Oĩma, Gs. {amount} enviados",
     "error_balance": "Saldo ndahetái",
@@ -76,6 +81,11 @@
   "gov": {
     "title": "Tembiapo del Estado",
     "search_placeholder": "Eheka tembiapo…",
+    "ruc_placeholder": "80012345-6",
+    "search_btn": "Buscar",
+    "ruc_razon": "Razón social",
+    "ruc_estado": "Estado",
+    "ruc_regimen": "Régimen",
     "duration": "{min} min",
     "free": "Gratis",
     "digital": "100% digital",
@@ -89,7 +99,9 @@
     "tab_book": "Turno USF",
     "tab_vaccine": "Vacuna óga",
     "symptoms_label": "Ere chéve qué reñeñandu",
+    "symptoms_placeholder": "Tengo fiebre y akã rasy desde anoche…",
     "ask": "Consultar",
+    "book_btn": "Reservar turno",
     "level_verde": "Leve",
     "level_amarillo": "Atención",
     "level_rojo": "Emergencia",
@@ -105,7 +117,9 @@
     "subject_score": "Nota",
     "attendance": "Oime jave",
     "tutor_topic_label": "¿Mba'épa reikuaase ko ára?",
-    "tutor_ask": "Eipuka chéve"
+    "tutor_topic_placeholder": "multiplicación, lectura, papapy…",
+    "tutor_ask": "Eipuka chéve",
+    "enroll_btn": "Confirmar matrícula"
   },
   "crypto": {
     "title": "Tarjeta USDC",
@@ -114,6 +128,7 @@
     "rate": "1 USDC = Gs. {rate}",
     "topup": "Recargar",
     "topup_label": "Mboy Gs.",
+    "topup_placeholder": "500.000",
     "lock": "Embotĩ tarjeta",
     "unlock": "Desbloquear",
     "disclaimer": "Stablecoin USDC es activo virtual experimental. Marco regulatorio paraguáipe oĩ."
@@ -142,6 +157,10 @@
     "discrete": "Modo discreto",
     "discrete_intro": "Si necesitás esconder esta pantalla, epoko modo discreto. Sale a calculadora. Para volver: 7 epoko en display.",
     "complaint_type": "Tipo",
+    "complaint_type_violencia": "Violencia familiar",
+    "complaint_type_robo": "Robo / hurto",
+    "complaint_type_acoso": "Acoso",
+    "complaint_type_estafa": "Estafa digital",
     "complaint_body": "Ere mba'épa oiko",
     "submit": "Mondo denuncia",
     "submitted": "Recibido. Ehenói 911 si es urgente.",

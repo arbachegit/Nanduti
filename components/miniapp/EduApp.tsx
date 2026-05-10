@@ -60,7 +60,7 @@ export default function EduApp() {
         <section className="nd-card">
           <h4>Matrícula 2026 — Sofía</h4>
           <p>Escuela Pública 234 - Trinidad. Clase 3°-A. Prof. Liliana Romero.</p>
-          <button type="button" className="nd-btn nd-btn--primary" onClick={() => callTool('edu.enroll', { student_id: '5432109', school_id: 'ESC-234' })}>Confirmar matrícula</button>
+          <button type="button" className="nd-btn nd-btn--primary" onClick={() => callTool('edu.enroll', { student_id: '5432109', school_id: 'ESC-234' })}>{t('edu.enroll_btn')}</button>
         </section>
       ) : null}
 
@@ -68,7 +68,7 @@ export default function EduApp() {
         <section className="edu__tutor nd-card">
           <label>
             <span>{t('edu.tutor_topic_label')}</span>
-            <input className="nd-input" value={topic} onChange={(e) => setTopic(e.target.value)} placeholder="multiplicación, lectura, números…" />
+            <input className="nd-input" value={topic} onChange={(e) => setTopic(e.target.value)} placeholder={t('edu.tutor_topic_placeholder')} />
           </label>
           <button type="button" className="nd-btn nd-btn--primary" disabled={!topic} onClick={async () => { const r = await callTool<TutorOut>('edu.tutor', { topic, lang: locale }); setTutor(r); }}>{t('edu.tutor_ask')}</button>
           {tutor ? (

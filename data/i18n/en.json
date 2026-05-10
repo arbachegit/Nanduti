@@ -1,5 +1,6 @@
 {
   "app": { "name": "Ñandutí", "tagline": "Your Paraguay, in a conversation." },
+  "common": { "close": "Close", "logout": "Sign out", "loading": "Loading…", "confirmed": "Confirmed", "code_label": "Code" },
   "hero": {
     "title": "Ñandutí",
     "subtitle": "Your Paraguay, in a conversation.",
@@ -65,9 +66,13 @@
     "tab_qr": "QR Hub",
     "tab_history": "History",
     "to_label": "Recipient",
+    "to_placeholder": "Name or ID",
     "amount_label": "Amount (Gs.)",
+    "amount_placeholder": "100,000",
     "concept_label": "Memo",
+    "concept_placeholder": "Family lunch",
     "send_btn": "Transfer",
+    "confirm_pay_btn": "Confirm payment",
     "scan_qr": "Scan QR",
     "success": "Done — Gs. {amount} sent",
     "error_balance": "Insufficient funds",
@@ -76,6 +81,11 @@
   "gov": {
     "title": "State paperwork",
     "search_placeholder": "Search a procedure…",
+    "ruc_placeholder": "80012345-6",
+    "search_btn": "Search",
+    "ruc_razon": "Legal name",
+    "ruc_estado": "Status",
+    "ruc_regimen": "Regime",
     "duration": "{min} min",
     "free": "Free",
     "digital": "100% digital",
@@ -89,7 +99,9 @@
     "tab_book": "USF",
     "tab_vaccine": "Family shots",
     "symptoms_label": "Tell me what you feel",
+    "symptoms_placeholder": "I've had a fever and headache since last night…",
     "ask": "Check",
+    "book_btn": "Book a slot",
     "level_verde": "Mild",
     "level_amarillo": "Watch",
     "level_rojo": "Emergency",
@@ -105,7 +117,9 @@
     "subject_score": "Grade",
     "attendance": "Attendance",
     "tutor_topic_label": "What do you want to learn today?",
-    "tutor_ask": "Explain"
+    "tutor_topic_placeholder": "multiplication, reading, numbers…",
+    "tutor_ask": "Explain",
+    "enroll_btn": "Confirm enrollment"
   },
   "crypto": {
     "title": "USDC Card",
@@ -114,6 +128,7 @@
     "rate": "1 USDC = Gs. {rate}",
     "topup": "Top up",
     "topup_label": "Amount in Gs.",
+    "topup_placeholder": "500,000",
     "lock": "Lock card",
     "unlock": "Unlock",
     "disclaimer": "USDC is an experimental virtual asset. Subject to Paraguay's regulatory framework still in formation."
@@ -142,6 +157,10 @@
     "discrete": "Discreet mode",
     "discrete_intro": "If you need to hide this screen fast, switch to discreet mode. Looks like a calculator. To return: 7 taps on the display.",
     "complaint_type": "Type of incident",
+    "complaint_type_violencia": "Domestic violence",
+    "complaint_type_robo": "Robbery / theft",
+    "complaint_type_acoso": "Harassment",
+    "complaint_type_estafa": "Digital scam",
     "complaint_body": "Tell me what happened",
     "submit": "Submit complaint",
     "submitted": "Received. Call 911 if urgent.",
