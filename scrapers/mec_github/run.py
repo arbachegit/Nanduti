@@ -19,7 +19,6 @@ from __future__ import annotations
 import os
 import sys
 import logging
-from datetime import datetime, timezone
 
 from _lib.http import make_client, get, is_dry_run
 from _lib.idempotency import sha256_payload
@@ -73,6 +72,8 @@ def fetch() -> list[dict]:
             except Exception:
                 tree = {"tree": []}
 
+            # Nota: captured_at NÃO entra no payload (sha256 mudaria a cada
+            # run e quebra idempotência). Usar collected_at do row.
             payload = {
                 "fonte_nome": FONTE_NOME,
                 "org": ORG,
@@ -89,7 +90,6 @@ def fetch() -> list[dict]:
                     {"path": x.get("path"), "size": x.get("size"), "type": x.get("type")}
                     for x in (tree.get("tree") or [])
                 ][:200],
-                "captured_at": datetime.now(timezone.utc).isoformat(),
             }
             out.append(payload)
     return out
