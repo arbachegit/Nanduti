@@ -14,7 +14,7 @@ services:
       deploy_on_push: true
 
     source_dir: /
-    build_command: npm ci && npm run build && cp -r public .next/standalone/ && mkdir -p .next/standalone/.next && cp -r .next/static .next/standalone/.next/
+    build_command: npm install --include=dev && npm run build && cp -r public .next/standalone/ && mkdir -p .next/standalone/.next && cp -r .next/static .next/standalone/.next/
     run_command: node .next/standalone/server.js
     environment_slug: node-js
     instance_size_slug: apps-s-1vcpu-1gb
