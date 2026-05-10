@@ -37,3 +37,13 @@ yarn-error.log*
 
 # vercel (we don't use it but ignore anyway)
 .vercel
+
+# python (scrapers)
+scrapers/.venv/
+scrapers/**/__pycache__/
+scrapers/**/*.pyc
+.ruff_cache/
+.pytest_cache/
+
+# supabase CLI temp
+supabase/.temp/

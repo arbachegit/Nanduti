@@ -94,3 +94,33 @@ Mockup demo · IconsAI · 2026.
 
 Ver `docs/PROMPT_MASTER.md` para el contrato nuclear (30 decisiones, 18
 ítems de roadmap, 20 criterios de aceptación, restricciones legales).
+
+---
+
+## MVP — Camino mock → real (en curso, branch `feat/mvp-real-data`)
+
+| Camada | Estado |
+|---|---|
+| LLM | DigitalOcean Gradient AI ("Manage Model Access Keys") via `lib/llm-client.ts`. Modelos `anthropic-claude-3.5-haiku` (orquestração) + `anthropic-claude-sonnet-4` (tutor/triage). Anthropic direto opcional em dev. |
+| Banco | Supabase `iconsai-nanduti`, schema `nanduti.*`. Migration `supabase/migrations/0001_init_nanduti.sql`. RLS ligada. |
+| Auth | Supabase próprio + Infobip WhatsApp/SMS OTP. CIC módulo 11 já validado. `DEMO_MODE=true` mantém María González pra apresentações. |
+| Coleta | GitHub Actions cron-driven em `.github/workflows/etl-*.yml` → scrapers Python em `scrapers/<fonte>/` → JSONB em `nanduti.raw_*` (UPSERT por sha256). |
+| Tools | Interface dos 28 tools **não muda**. `lib/data-source/<dominio>.ts` substitui handler de cada `mock-*.ts` quando `dbAvailable()`. |
+
+### Fontes Paraguai mapeadas (12 workflows planejados)
+
+API REST estáveis: **DNCP OCDS v2** · **datos.mec.gov.py** · **ReliefWeb SEN** · **DNIT consultaRUC** (apiKey).
+Scraping HTML respetuoso (1 req/s, User-Agent identificado): **Agencia IP** · **Decretos Presidencia** · **Gaceta Oficial** · **DINAC pronóstico** · **ANDE cortes** · **BCP cotação** · **paraguay.gov.py catálogo** · **SEPRELAD resoluciones**.
+
+### Como aplicar a migration
+
+```bash
+# Pré-requisito: Supabase project criado, SUPABASE_DB_URL exportada
+supabase db push --db-url "$SUPABASE_DB_URL"
+# ou direto via psql:
+psql "$SUPABASE_DB_URL" -f supabase/migrations/0001_init_nanduti.sql
+```
+
+### Ultraplano completo
+
+Roadmap 4 semanas: ver issue/PR `feat/mvp-real-data` ou conversa de design.
