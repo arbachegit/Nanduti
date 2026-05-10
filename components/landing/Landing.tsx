@@ -152,10 +152,88 @@ function SlideConversation({ active }: { active: boolean }) {
 }
 
 /* ===========================================================
-   Slide 03 — Mini-apps
+   Slide 03 — Mini-apps with micro-mockups
    =========================================================== */
 const APP_LIST: Array<'wallet'|'gov'|'health'|'edu'|'crypto'|'info'|'alerts'|'police'|'docs'> =
   ['wallet','gov','health','edu','crypto','info','alerts','police','docs'];
+
+const MOCKUPS: Record<string, () => React.ReactElement> = {
+  wallet: () => (
+    <div className="mk mk-w">
+      <span className="mk-w__pyg">Gs. 4.350.000</span>
+      <span className="mk-w__usdc">247,83 USDC<span className="mk-w__rate">·  6.159,41 BCP</span></span>
+    </div>
+  ),
+  gov: () => (
+    <ul className="mk mk-g">
+      <li><span className="mk-g__chk" /> Renovar cédula <span className="mk-g__min">15m</span></li>
+      <li><span className="mk-g__chk is-on" /> Consultar RUC <span className="mk-g__min">2m</span></li>
+      <li><span className="mk-g__chk" /> Matrícula MEC <span className="mk-g__min">8m</span></li>
+    </ul>
+  ),
+  health: () => (
+    <div className="mk mk-h">
+      <div className="mk-h__bar">
+        <span className="mk-h__seg s-g" />
+        <span className="mk-h__seg s-a" />
+        <span className="mk-h__seg s-r" />
+        <span className="mk-h__pin" style={{ left: '32%' }} />
+      </div>
+      <div className="mk-h__row"><span>USF Trinidad</span><span className="mk-h__d">1,2km</span></div>
+    </div>
+  ),
+  edu: () => (
+    <ul className="mk mk-e">
+      <li><span>Lengua</span><span className="mk-e__g">4,5</span></li>
+      <li><span>Matemática</span><span className="mk-e__g is-ok">3,8</span></li>
+      <li><span>CCNN</span><span className="mk-e__g">4,2</span></li>
+    </ul>
+  ),
+  crypto: () => (
+    <div className="mk mk-c">
+      <div className="mk-c__card">
+        <div className="mk-c__chip" />
+        <div className="mk-c__num">···· 4827</div>
+        <div className="mk-c__lbl">Mastercard · USDC</div>
+      </div>
+    </div>
+  ),
+  info: () => (
+    <ul className="mk mk-i">
+      <li><span className="mk-i__bar" style={{ width: '88%' }} /><span className="mk-i__d">2h</span></li>
+      <li><span className="mk-i__bar" style={{ width: '72%' }} /><span className="mk-i__d">5h</span></li>
+      <li><span className="mk-i__bar is-mut" style={{ width: '60%' }} /><span className="mk-i__d">2d</span></li>
+    </ul>
+  ),
+  alerts: () => (
+    <div className="mk mk-a">
+      <span className="mk-a__pill"><span className="mk-a__pdot" /> WATCH · Concepción</span>
+      <div className="mk-a__row"><span>DINAC</span><span>fresco a frío</span></div>
+      <div className="mk-a__row"><span>SEN</span><span>asistencia · Cateura</span></div>
+    </div>
+  ),
+  police: () => (
+    <div className="mk mk-p">
+      <div className="mk-p__btn">SOS<span className="mk-p__ring" /></div>
+      <div className="mk-p__d">DEAM · 1,4km</div>
+    </div>
+  ),
+  docs: () => (
+    <div className="mk mk-d">
+      <div className="mk-d__cards">
+        <span className="mk-d__c s-3" />
+        <span className="mk-d__c s-2" />
+        <span className="mk-d__c s-1">
+          <span className="mk-d__b" style={{ width: '60%' }} />
+          <span className="mk-d__b" style={{ width: '85%' }} />
+        </span>
+      </div>
+      <div className="mk-d__qr">
+        <span /><span /><span /><span /><span /><span /><span /><span /><span />
+      </div>
+    </div>
+  ),
+};
 
 function SlideApps({ active }: { active: boolean }) {
   const { t } = useNandutiLocale();
@@ -170,12 +248,14 @@ function SlideApps({ active }: { active: boolean }) {
         <div className="ndl-apps__grid">
           {APP_LIST.map((id, i) => {
             const Icon = APP_ICON[id];
+            const Mockup = MOCKUPS[id];
             return (
               <article key={id} className="ndl-app" style={{ ['--i' as string]: i } as React.CSSProperties}>
                 <div className="ndl-app__head">
                   <span className="ndl-app__icn"><Icon width={16} height={16} /></span>
                   <span className="ndl-app__nm">{t(`sidebar.${id}`)}</span>
                 </div>
+                <div className="ndl-app__mock">{Mockup ? Mockup() : null}</div>
                 <p className="ndl-app__tag">{t(`landing.miniapps.${id}_tag`)}</p>
               </article>
             );
