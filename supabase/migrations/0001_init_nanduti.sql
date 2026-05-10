@@ -11,6 +11,29 @@ comment on schema nanduti is 'Ñandutí super-app — schema isolado';
 -- ---- Identity (Supabase próprio, não Identity Hub) ----------
 -- Override consciente do CLAUDE.md global: Ñandutí MVP usa auth
 -- isolada por velocidade. SSO cross-app fica fora do escopo.
+-- Decisão de projeto: dim_pessoas paraguaia vive DENTRO de nanduti.*,
+-- não no Scraping (que é de pessoas brasileiras).
+
+create table if not exists nanduti.dim_pessoas_py (
+  id uuid primary key default gen_random_uuid(),
+  cic text unique,                       -- cédula paraguaya validada (módulo 11)
+  nombre text,
+  apellido text,
+  fecha_nacimiento date,
+  sexo text check (sexo in ('M','F','X')),
+  geo_dpto text,
+  geo_distrito text,
+  email text,
+  phone_e164 text,
+  fonte_id uuid,                         -- FK fontes_dados (TSJE/DNCP/consentido) — adicionada abaixo
+  consentido_em timestamptz,             -- quando o titular autorizou cadastro (LGPD/PY)
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+comment on table nanduti.dim_pessoas_py is 'Dimensão de pessoas paraguaias. Alimentada por: (a) usuários reais consentidos do Ñandutí, (b) padrón TSJE quando público, (c) extração nominal de DNCP. NUNCA usa o dim_pessoas brasileiro do Scraping.';
+
+create index if not exists idx_dim_pessoas_cic on nanduti.dim_pessoas_py (cic) where cic is not null;
+create index if not exists idx_dim_pessoas_nome on nanduti.dim_pessoas_py (nombre, apellido);
 
 create table if not exists nanduti.users (
   id uuid primary key default gen_random_uuid(),
@@ -24,14 +47,16 @@ create table if not exists nanduti.users (
   geo_distrito text,
   geo_lat double precision,
   geo_lng double precision,
+  dim_pessoa_id uuid references nanduti.dim_pessoas_py(id) on delete set null,  -- enrichment opcional
   demo_persona boolean not null default false,
   created_at timestamptz not null default now(),
   last_login_at timestamptz
 );
-comment on table nanduti.users is 'Usuários do Ñandutí. demo_persona=true para María González (apresentações).';
+comment on table nanduti.users is 'Usuários do Ñandutí. demo_persona=true para María González (apresentações). dim_pessoa_id é FK opcional pra dim_pessoas_py.';
 
 create index if not exists idx_users_cic on nanduti.users (cic) where cic is not null;
 create index if not exists idx_users_phone on nanduti.users (phone_e164) where phone_e164 is not null;
+create index if not exists idx_users_dim_pessoa on nanduti.users (dim_pessoa_id) where dim_pessoa_id is not null;
 
 -- ---- Audit estoniano (X-Road style) -------------------------
 create table if not exists nanduti.audit_log (
@@ -81,6 +106,18 @@ create table if not exists nanduti.fontes_dados_vinculos (
   ts timestamptz not null default now(),
   unique (fonte_id, tabela, registro_id)
 );
+
+-- FK tardia: dim_pessoas_py.fonte_id → fontes_dados (resolve ordem de criação)
+do $$
+begin
+  if not exists (
+    select 1 from pg_constraint where conname = 'dim_pessoas_py_fonte_fkey'
+  ) then
+    alter table nanduti.dim_pessoas_py
+      add constraint dim_pessoas_py_fonte_fkey
+      foreign key (fonte_id) references nanduti.fontes_dados(id) on delete set null;
+  end if;
+end $$;
 
 -- ---- Camada raw (JSONB imutável, idempotência por sha256) ---
 -- Pattern: cada raw_* tem (id, source_url, payload, sha256 unique, collected_at)
@@ -325,13 +362,15 @@ create table if not exists nanduti.docs_audit (
 create index if not exists idx_docs_audit_vc on nanduti.docs_audit (vc_id, ts desc);
 
 -- ---- RLS --------------------------------------------------
--- Enable em todas user-scoped. Service role do server bypassa.
+-- Enable em todas user-scoped + dim_pessoas_py (PII).
+-- Service role do server bypassa policies.
 alter table nanduti.users enable row level security;
 alter table nanduti.audit_log enable row level security;
 alter table nanduti.alert_subscriptions enable row level security;
 alter table nanduti.complaints enable row level security;
 alter table nanduti.docs_vc enable row level security;
 alter table nanduti.docs_audit enable row level security;
+alter table nanduti.dim_pessoas_py enable row level security;
 
 -- Policies: cada user só lê/escreve seu próprio registro
 -- (auth.uid() = user_id). Service role do server-side bypassa.
@@ -352,6 +391,12 @@ create policy "docs_vc self all" on nanduti.docs_vc
 
 create policy "docs_audit self read" on nanduti.docs_audit
   for select using (auth.uid() = (select user_id from nanduti.docs_vc where id = vc_id));
+
+-- dim_pessoas_py: cidadão só vê seu próprio registro (via users.dim_pessoa_id)
+create policy "dim_pessoas self read" on nanduti.dim_pessoas_py
+  for select using (
+    id in (select dim_pessoa_id from nanduti.users where id = auth.uid() and dim_pessoa_id is not null)
+  );
 
 -- ---- Seed: fontes_dados -----------------------------------
 insert into nanduti.fontes_dados (nome, url_canonica, tipo, cron_humano, notas) values

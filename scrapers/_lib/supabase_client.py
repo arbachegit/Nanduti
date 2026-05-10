@@ -1,4 +1,5 @@
 """Cliente Supabase service-role + helpers idempotentes."""
+from __future__ import annotations
 import os
 from typing import Any
 from supabase import create_client, Client

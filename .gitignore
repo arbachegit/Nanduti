@@ -44,3 +44,6 @@ scrapers/**/__pycache__/
 scrapers/**/*.pyc
 .ruff_cache/
 .pytest_cache/
+
+# supabase CLI temp
+supabase/.temp/
