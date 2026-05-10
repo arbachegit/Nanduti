@@ -633,9 +633,10 @@
   padding: 18px 36px 24px;
 }
 .ndl-pgr__inner { display: flex; align-items: center; justify-content: space-between; gap: 24px; max-width: 1280px; margin: 0 auto; }
-.ndl-pgr__count { font-family: var(--ndl-mono); font-size: 12px; letter-spacing: 0.20em; color: var(--ndl-fg-dim); }
+.ndl-pgr__count { font-family: var(--ndl-mono); font-size: 12px; letter-spacing: 0.20em; color: var(--ndl-fg-dim); display: inline-flex; align-items: baseline; }
 .ndl-pgr__cur { color: var(--ndl-cyan); font-weight: 600; }
 .ndl-pgr__sl { padding: 0 6px; opacity: 0.4; }
+.ndl-pgr__lbl { padding-left: 14px; color: var(--ndl-fg-mut); text-transform: uppercase; }
 
 .ndl-pgr__dots { display: flex; gap: 14px; }
 .ndl-pgr__dot { background: transparent; border: none; padding: 4px; cursor: pointer; }

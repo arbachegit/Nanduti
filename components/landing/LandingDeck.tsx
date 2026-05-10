@@ -482,8 +482,8 @@ function SlideManifesto({ active, totals }: { active: boolean; totals: LandingDa
 /* ============================================================
    Pager
    ============================================================ */
-function Pager({ active, total, paused, onJump, onTogglePause }: {
-  active: number; total: number; paused: boolean; onJump: (i: number) => void; onTogglePause: () => void;
+function Pager({ active, total, paused, onJump, onTogglePause, slideName }: {
+  active: number; total: number; paused: boolean; onJump: (i: number) => void; onTogglePause: () => void; slideName: string;
 }) {
   return (
     <div className="ndl-pgr" role="group" aria-label="presentation navigation">
@@ -492,6 +492,7 @@ function Pager({ active, total, paused, onJump, onTogglePause }: {
           <span className="ndl-pgr__cur">{(active + 1).toString().padStart(2,'0')}</span>
           <span className="ndl-pgr__sl">/</span>
           <span>{total.toString().padStart(2,'0')}</span>
+          <span className="ndl-pgr__lbl">·  {slideName}</span>
         </div>
 
         <div className="ndl-pgr__dots">
@@ -598,7 +599,13 @@ export default function LandingDeck({ data }: { data: LandingData }) {
         })}
       </div>
 
-      <Pager active={active} total={total} paused={paused} onJump={goTo} onTogglePause={() => setPaused((p) => !p)} />
+      <PagerWithI18n active={active} total={total} paused={paused} onJump={goTo} onTogglePause={() => setPaused((p) => !p)} />
     </main>
   );
+}
+
+function PagerWithI18n(props: { active: number; total: number; paused: boolean; onJump: (i: number) => void; onTogglePause: () => void }) {
+  const { t } = useNandutiLocale();
+  const id = SLIDES[props.active];
+  return <Pager {...props} slideName={t(`landing.slides.${id}`)} />;
 }

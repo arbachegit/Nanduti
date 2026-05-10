@@ -235,6 +235,14 @@
       "manifesto": "A digital infrastructure is measured by its respect for the citizen.",
       "credit": "Ñandutí · MITIC × IconsAI · 2026",
       "demo_note": "Institutional demo. Real data, fictitious persona."
+    },
+    "slides": {
+      "vision": "Vision",
+      "conversation": "Dialogue",
+      "apps": "Services",
+      "feed": "Live",
+      "sources": "Sources",
+      "manifesto": "Manifesto"
     }
   }
 }
