@@ -1,3 +1,5 @@
+const path = require('path');
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'standalone',
@@ -6,6 +8,15 @@ const nextConfig = {
   experimental: {
     webpackMemoryOptimizations: true,
     serverMinification: false,
+  },
+  // Explicit webpack alias — Linux/case-sensitive build was failing to resolve
+  // @/ via tsconfig paths alone. This forces the resolution at webpack level.
+  webpack: (config) => {
+    config.resolve.alias = {
+      ...(config.resolve.alias || {}),
+      '@': path.resolve(__dirname),
+    };
+    return config;
   },
   async headers() {
     return [
