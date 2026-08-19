@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# Barreira do dono (CLAUDE.md §-1). Vale para QUALQUER ferramenta que use git
+# neste repositorio — agente, IDE ou terminal —, nao so para o Claude Code.
+#
+# Commit exige autorizacao explicita do dono na propria linha de comando:
+#     NANDUTI_OWNER_OK=1 git commit -m "..."
+#
+# O agente nao deve exportar essa variavel por conta propria. Se ele exportar,
+# a barreira que resta e o pre-push, o gate verify:owner-guardrails e o
+# CODEOWNERS no GitHub — por isso sao quatro camadas e nao uma.
+set -euo pipefail
+
+if [ "${NANDUTI_OWNER_OK:-}" != "1" ]; then
+  echo "BLOQUEADO: commit sem autorizacao expressa do dono (CLAUDE.md §-1)." >&2
+  echo "" >&2
+  echo "Arquivos que seriam commitados:" >&2
+  git diff --cached --name-status >&2
+  echo "" >&2
+  echo "Se VOCE autorizou, repita com:  NANDUTI_OWNER_OK=1 git commit ..." >&2
+  exit 1
+fi
+exit 0

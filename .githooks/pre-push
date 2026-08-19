@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# Barreira do dono (CLAUDE.md §-1). Push em main dispara o deploy: publica em
+# producao. Exige autorizacao explicita na linha de comando:
+#     NANDUTI_OWNER_OK=1 git push origin main
+set -euo pipefail
+
+if [ "${NANDUTI_OWNER_OK:-}" != "1" ]; then
+  echo "BLOQUEADO: push publica em producao e nao foi autorizado (CLAUDE.md §-1)." >&2
+  echo "Se VOCE autorizou, repita com:  NANDUTI_OWNER_OK=1 git push origin main" >&2
+  exit 1
+fi
+exit 0
