@@ -605,3 +605,54 @@ outras. Ele vira memória privada com aparência de norma.
 > **NUNCA** escreva item novo na fonte sem propagar para todas as cópias **na
 > mesma entrega**. O que uma sessão aprende, todas recebem (`CLAUDE.md §−1.14`).
 
+## 28. Deixou o envio de e-mail com quem não é o Resend
+
+20/08. O acesso do `atlas` foi publicado delegando o envio do código ao mailer
+do próprio Supabase. O passo 1 respondia, o passo 2 respondia, e o código
+**nunca chegava**. Chamando a API do Supabase direto, sem o serviço no meio:
+
+```
+POST /auth/v1/otp
+{"code":500,"error_code":"unexpected_failure","msg":"Error sending magic link email"}
+```
+
+O mailer daquele projeto está quebrado — e ninguém tinha percebido porque
+**nenhum e-mail do ecossistema deveria sair por ele**.
+
+Regra canônica do dono, 20/08/2026:
+
+> **100% dos e-mails são gerenciados pelo Resend.**
+
+Não é preferência de fornecedor: é o que garante domínio próprio, reputação de
+envio, log de entrega e uma única fila para auditar. E-mail que sai pelo mailer
+padrão de uma plataforma sai de um domínio compartilhado, com rate limit
+apertado e sem rastro do lado de cá — quando some, não há onde olhar.
+
+O que estava configurado e ninguém tinha ligado, medido no mesmo dia:
+
+| | |
+|---|---|
+| `noreply@mail.atlas.iconsai.ai` | **aceito** pelo Resend |
+| `noreply@atlas.iconsai.ai` | 403 — o domínio verificado é o `mail.` |
+| `smtp.resend.com:465` | aberta, `220 Resend SMTP Relay ESMTP` |
+| `smtp.resend.com:587` | **timeout** — a porta é 465 |
+
+O padrão de remetente do ecossistema, extraído dos apps que já enviam:
+`noreply@mail.<app>.iconsai.ai`.
+
+> **NUNCA** deixe o envio de e-mail com o mailer padrão de uma plataforma —
+> Supabase, Firebase, Auth0, seja qual for. Todo e-mail de toda produção sai
+> pelo **Resend**, do domínio verificado daquela aplicação. Vale para OTP,
+> recuperação, convite, notificação e transacional.
+
+> **NUNCA** presuma que o domínio raiz está verificado. O verificado é
+> `mail.<app>.iconsai.ai`; o raiz devolve 403. Teste o remetente com um envio
+> real antes de escrever o `from` no código — custa um e-mail e evita um fluxo
+> de acesso que responde 200 e não entrega nada.
+
+> **NUNCA** trate "o endpoint respondeu" como "o e-mail saiu". No atlas os dois
+> primeiros passos responderam certo por horas enquanto o terceiro não entregava.
+> A prova de que o envio funciona é a mensagem chegando, e o único jeito de ter
+> essa prova de dentro do pipeline é o log de entrega do Resend — mais um motivo
+> para o envio não ficar com terceiro.
+
