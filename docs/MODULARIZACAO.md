@@ -1,12 +1,14 @@
 # Modularização — guideline canônico IconsAI
 
-**Versão:** 1.0.1 · **Data:** 15/09/2026 · **Status:** canônico e obrigatório
+**Versão:** 1.0.2 · **Data:** 15/09/2026 · **Status:** canônico e obrigatório
 **Vale para:** todo repositório do ecossistema, sem exceção. Canônico e obrigatório.
 **Fonte única:** `iconsaiConfig/canon/MODULARIZACAO.md`. A cópia em `docs/MODULARIZACAO.md` de cada
 repositório é byte a byte igual à fonte; cópia editada à mão é divergência e reprova.
 
-**1.0.1:** o mesmo conteúdo da 1.0.0, formatado pelo Prettier — a cópia idêntica passa no
-`prettier --check` dos repositórios que o rodam no CI (medido em `movie` e `discovery`).
+**1.0.2:** chave gravada no banco em inglês (§4); `node_modules` fora de `exclude`, versão fixa da
+ferramenta e zero módulos como "não mediu" (§5); caminho de script citado fora do código é
+contrato (§6.3); cinco sabotagens obrigatórias e o caso legítimo verde (§9); `module/` como regra
+da casa que vale para todos (§11).
 
 ---
 
@@ -113,6 +115,12 @@ link compartilhado e todo aplicativo que chama a API. Medido em 15/09/2026: **20
 nome em português, contra **90 pastas internas**. A regra de inglês vale para as internas; a pasta de
 rota segue o endereço, e endereço novo nasce em inglês.
 
+**Chave gravada no banco segue a mesma regra.** Valor que o código compara por igualdade
+(`busca`, `curadoria`, `fontes`) é nome, e vai para inglês (`search`, `curation`, `sources`), com
+uma coluna de legado guardando o valor antigo para nada quebrar. Origem: decisão do dono sobre o
+`rotas` em 15/09/2026, respondendo à pergunta sobre as chaves de `dim_ferramentas` — «Chaves também
+em inglês (Recomendado)». Este guideline estende a decisão a todo o ecossistema.
+
 ---
 
 ## 5. As regras de fronteira
@@ -154,6 +162,15 @@ ecossistema. Três detalhes:
 3. **Não use grupo opcional ao lado de classe negada** (`(?:[^/]+/)?[^/]+`). O `dependency-cruiser`
    recusa com `has an unsafe regular expression. Bailing out.` e **aborta** — o comando pode parecer
    limpo sem ter medido nada. Escreva as alternativas explícitas, em array.
+4. **`node_modules` nunca vai em `exclude`.** `exclude` apaga do grafo toda dependência para o
+   caminho excluído, e `so-o-adaptador-fala-com-o-banco` fica cega: o import do cliente do banco
+   some antes de chegar na regra. Quem evita entrar no pacote é `doNotFollow`, que mantém a
+   dependência registrada. Medido pela prova do vermelho no piloto do superadmin: a sabotagem de
+   banco passou limpa, com zero dependências registradas no contrato.
+5. **A versão da ferramenta é fixa** (`dependency-cruiser` com versão exata no `package.json`).
+   Regra que muda de comportamento entre versões muda o veredito sem ninguém ter mudado o código.
+6. **Zero módulos cruzados é "não mediu", nunca "limpo".** O gate lê o resumo da ferramenta e
+   sai com código próprio de "não pôde medir" quando nada foi cruzado.
 
 ---
 
@@ -200,6 +217,12 @@ Os scripts npm (`npm run test`, `npm run build`) continuam existindo e chamam es
    launchd, systemd) ou pela documentação. Script sem referência é **perguntado**, nunca apagado.
 4. **Exit code real**: `0` deu certo · diferente de `0` falhou. Nunca `|| true` para esconder falha.
 5. **Nenhum segredo no arquivo.** Credencial vem do ambiente.
+6. **Caminho de script citado fora do código é contrato.** Se o deploy empacota o script por nome,
+   um processo o dispara por caminho, uma sincronização com `--delete` copia a pasta ou uma unit
+   do systemd aponta para ele, renomear exige atualizar **todas** essas referências no mesmo
+   commit e provar que o deploy encontra o arquivo. Medido no `rotas`: renomear um coletor sem
+   mexer na lista do deploy e no mapa de disparo faz a sincronização apagar o arquivo antigo e o
+   job falhar como `script_not_found`, sem erro no deploy.
 
 ---
 
@@ -253,17 +276,21 @@ para a forma antiga) em **aviso** durante a transição. Ela sai quando a forma 
 Um gate só vale depois de provado que ele reprova. Três sabotagens, numa base que você **acabou de ver
 limpa**, e cada uma tem de reprovar **pela regra certa** — conferir só o exit code não basta:
 
-| #   | sabotagem                                                      | tem de reprovar por                           |
-| --- | -------------------------------------------------------------- | --------------------------------------------- |
-| 1   | `contrato` importa `leitura` do mesmo módulo                   | `porta-nao-conhece-adaptador` (e `sem-ciclo`) |
-| 2   | um módulo importa um arquivo interno de outro                  | `fachada-modulo`                              |
-| 3   | uma rota em `app/api/` importa um arquivo interno de um módulo | `fachada-de-fora`                             |
+| #   | sabotagem                                                           | tem de reprovar por                           |
+| --- | ------------------------------------------------------------------- | --------------------------------------------- |
+| 1   | `contrato` importa `leitura` do mesmo módulo                        | `porta-nao-conhece-adaptador` (e `sem-ciclo`) |
+| 2   | um módulo importa um arquivo interno de outro                       | `fachada-modulo`                              |
+| 3   | uma rota em `app/api/` importa um arquivo interno de um módulo      | `fachada-de-fora`                             |
+| 4   | um arquivo de módulo que não é adaptador importa o cliente do banco | `so-o-adaptador-fala-com-o-banco`             |
+| 5   | um arquivo de `shared/` importa um módulo                           | `compartilhado-nao-conhece-modulo`            |
 
 A terceira é a que pegou o buraco no `rotas`: a primeira regra só olhava imports nascidos dentro da
 raiz de módulos, e 53 violações vindas de `app/api/` estavam invisíveis.
 
 **Todo repositório tem também um caso que prova que o gate RODA**, não só que passa: uma config
-inválida que aborta é indistinguível de um repositório sem violações.
+inválida que aborta é indistinguível de um repositório sem violações. E um caso legítimo — um
+módulo importando outro pela fachada — tem de continuar verde: gate que reprova o caminho certo
+obriga a desligá-lo.
 
 ---
 
@@ -293,8 +320,10 @@ Estas regras existem no ecossistema e **não aparecem em nenhuma fonte de mercad
 | todo cálculo e orquestração em Python; a tela só formata | skill `$modular`, Lei 6                                          | só em repositório com `modular.json` |
 | teto de 400 linhas por arquivo                           | skill `$modular`, Lei 1 (caso medido: rota de 2.194 → 33 linhas) | só em repositório com `modular.json` |
 | determinismo e idempotência medidos por dupla execução   | skill `$modular`, Leis 3 e 4                                     | só em repositório com `modular.json` |
+| raiz de módulos no singular, `module/`                   | ordem do dono, 15/09/2026: «Os módulos tem que estar em module/» | **todos** os repositórios            |
 
-Este guideline **não impõe** as regras da casa. Em 15/09/2026, os repositórios com `modular.json` são
+A raiz `module/` é a única regra da casa que vale para todos: o mercado usa `modules/` ou
+`src/modules/`, e o singular é decisão do dono. As outras três, este guideline **não impõe**. Em 15/09/2026, os repositórios com `modular.json` são
 `superadmin`, `rotas`, `tools` e `Assai`; neles as duas coisas valem juntas.
 
 ---
@@ -308,7 +337,7 @@ Este guideline **não impõe** as regras da casa. Em 15/09/2026, os repositório
 | módulos existentes                                  | 35 — 21 em `modules/`, 14 em `lib/modulos/`, nenhum ainda em `module/` |
 | scripts em `scripts/`, `script/`, `bin/` e `tools/` | 1.652 — `atlas` 499, `rotas` 257, `scraping` 168, `superadmin` 135     |
 | nomes distintos de pasta em português               | ao menos 74 (heurística; o número real é maior)                        |
-| repositórios com ferramenta de fronteira na `main`  | 0 — o `rotas` tem no PR #274                                           |
+| repositórios com ferramenta de fronteira            | `rotas` (PR #274) e `superadmin` (piloto, PR #176)                     |
 
 ---
 
