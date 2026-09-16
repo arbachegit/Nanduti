@@ -1,9 +1,14 @@
 # Modularização — guideline canônico IconsAI
 
-**Versão:** 1.0.3 · **Data:** 16/09/2026 · **Status:** canônico e obrigatório
+**Versão:** 1.0.4 · **Data:** 16/09/2026 · **Status:** canônico e obrigatório
 **Vale para:** todo repositório do ecossistema, sem exceção. Canônico e obrigatório.
 **Fonte única:** `iconsaiConfig/canon/MODULARIZACAO.md`. A cópia em `docs/MODULARIZACAO.md` de cada
 repositório é byte a byte igual à fonte; cópia editada à mão é divergência e reprova.
+
+**1.0.4:** o escopo do canon passa a ser declarado — os aplicativos de `APP/`, `STANDALONE/`,
+`SHOWCASE/` e `AITUTOR/`, 61 repositórios, com os 10 de fora em `EXCLUSOES` e motivo escrito
+(§12, §13). A §5 ganha o item 9: gate que varre lista fixa de pastas precisa incluir a raiz de
+módulos, provado com sabotagem dentro da raiz nova, antes e depois.
 
 **1.0.3:** a raiz volta a `modules/`, no plural — ordem do dono em 16/09/2026, revertendo a de
 15/09: «concordo ser no plural». Com isso a raiz SAI da §11: plural é convenção de mercado (Nx,
@@ -183,6 +188,16 @@ ecossistema. Três detalhes:
    a de três, é o nome da natureza (`class|category|tool|panel|application|service`) que separa a
    forma nova da antiga. Com a lista em português, módulo novo cai na regra do legado e é cobrado
    em `warn` onde deveria ser `error` — o gate afrouxa exatamente onde deveria apertar.
+9. **Todo gate que varre uma lista fixa de pastas precisa incluir a raiz de módulos**, e a adoção
+   prova isso com uma sabotagem DENTRO da raiz nova. Mover código para `modules/` sem mexer na
+   lista tira esse código do alcance do gate: ele continua verde por ter deixado de olhar, não por
+   o código ter ficado limpo. Medido no superadmin em 16/09/2026 (PR #181, build de produção
+   `f0be5e2_20260916135709`), com `sessionStorage.setItem("x", "1")` no fim de
+   `modules/accident/browser.ts`: com `roots = ["app","components","lib"]` o gate saiu **EXIT=0**,
+   verde, com a sabotagem no lugar; com `modules` na lista saiu **EXIT=1**, nomeando
+   `modules/accident/browser.ts: sessionStorage`. É o par antes/depois, com a MESMA sabotagem, que
+   prova a cobertura — o vermelho sozinho não distingue "passou a alcançar a raiz" de "escrevi uma
+   sabotagem mais fácil de pegar".
 
 ---
 
@@ -338,17 +353,18 @@ Este guideline **não impõe** nenhuma das três. Em 15/09/2026, os repositório
 
 ---
 
-## 12. Onde o ecossistema parte (medido em 15/09/2026)
+## 12. Onde o ecossistema parte (medido em 15 e 16/09/2026)
 
-| medida                                              | valor                                                                                                                                                   |
-| --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| repositórios                                        | 28                                                                                                                                                      |
-| repositórios sem nenhum módulo                      | 24                                                                                                                                                      |
-| módulos existentes                                  | 35 — 21 em `modules/`, 14 em `lib/modulos/`                                                                                                             |
-| grafia da raiz                                      | `modules/`, no plural, desde 16/09/2026 — a ordem de 15/09 fixava o singular, e as duas datas ficam registradas para o histórico não parecer incoerente |
-| scripts em `scripts/`, `script/`, `bin/` e `tools/` | 1.652 — `atlas` 499, `rotas` 257, `scraping` 168, `superadmin` 135                                                                                      |
-| nomes distintos de pasta em português               | ao menos 74 (heurística; o número real é maior)                                                                                                         |
-| repositórios com ferramenta de fronteira            | `rotas` (PR #274) e `superadmin` (piloto, PR #176)                                                                                                      |
+| medida                                              | valor                                                                                                                                                                    |
+| --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| repositórios no escopo                              | **61** — os aplicativos de `APP/`, `STANDALONE/`, `SHOWCASE/` e `AITUTOR/` (ordem do dono, 16/09/2026). Os 10 de fora constam em `EXCLUSOES`, cada um com motivo escrito |
+| cobertura ao abrir o escopo                         | 3 de 61 (4,9%) — dizia 2 de 28 (7,1%) enquanto o denominador vinha do argumento `--raiz`, e não da lista declarada                                                       |
+| repositórios sem nenhum módulo                      | 24                                                                                                                                                                       |
+| módulos existentes                                  | 35 — 21 em `modules/`, 14 em `lib/modulos/`                                                                                                                              |
+| grafia da raiz                                      | `modules/`, no plural, desde 16/09/2026 — a ordem de 15/09 fixava o singular, e as duas datas ficam registradas para o histórico não parecer incoerente                  |
+| scripts em `scripts/`, `script/`, `bin/` e `tools/` | 1.652 — `atlas` 499, `rotas` 257, `scraping` 168, `superadmin` 135                                                                                                       |
+| nomes distintos de pasta em português               | ao menos 74 (heurística; o número real é maior)                                                                                                                          |
+| repositórios com ferramenta de fronteira            | `rotas` (PR #274) e `superadmin` (piloto, PR #176)                                                                                                                       |
 
 ---
 
@@ -360,6 +376,11 @@ Este guideline **não impõe** nenhuma das três. Em 15/09/2026, os repositório
 - `iconsaiConfig/canon/verificar_modularizacao.py` mede todos os repositórios e classifica cada um como
   `igual`, `divergente`, `ausente` ou `nao_medido`. **100% só é declarado quando todos são `igual`.**
   `nao_medido` não conta como cumprido, e worktree não conta como repositório.
+- **O denominador é declarado, nunca argumentado.** Repositório fora do escopo entra em
+  `EXCLUSOES` com o motivo escrito, e sai no relatório. Medido em 16/09/2026: rodar o verificador
+  com `--raiz ~/projects/APP` em vez de `~/projects` derrubava a conta de 61 para 28 sem uma linha
+  no relatório — um "100% cumprido" que media o argumento de linha de comando, não o ecossistema.
+  Exclusão silenciosa estreita o denominador da própria medição, e é por isso que ela se escreve.
 
 ---
 
