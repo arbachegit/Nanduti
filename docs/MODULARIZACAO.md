@@ -1,9 +1,14 @@
 # Modularização — guideline canônico IconsAI
 
-**Versão:** 1.0.2 · **Data:** 15/09/2026 · **Status:** canônico e obrigatório
+**Versão:** 1.0.3 · **Data:** 16/09/2026 · **Status:** canônico e obrigatório
 **Vale para:** todo repositório do ecossistema, sem exceção. Canônico e obrigatório.
 **Fonte única:** `iconsaiConfig/canon/MODULARIZACAO.md`. A cópia em `docs/MODULARIZACAO.md` de cada
 repositório é byte a byte igual à fonte; cópia editada à mão é divergência e reprova.
+
+**1.0.3:** a raiz volta a `modules/`, no plural — ordem do dono em 16/09/2026, revertendo a de
+15/09: «concordo ser no plural». Com isso a raiz SAI da §11: plural é convenção de mercado (Nx,
+Turborepo, Next), não decisão da casa. A §5 ganha duas exigências medidas na adoção: a config mede
+as duas grafias (7) e a regra de transição lista as naturezas em inglês (8).
 
 **1.0.2:** chave gravada no banco em inglês (§4); `node_modules` fora de `exclude`, versão fixa da
 ferramenta e zero módulos como "não mediu" (§5); caminho de script citado fora do código é
@@ -41,7 +46,7 @@ Se o código responde a uma pergunta de negócio ("quem pode entrar?", "quanto f
 
 | peça              | nome de mercado                      | o que é                                                     | pode falar com banco/rede?                      |
 | ----------------- | ------------------------------------ | ----------------------------------------------------------- | ----------------------------------------------- |
-| **módulo**        | Bounded Context · Package by Feature | uma pasta por domínio de negócio, dentro de `module/`       | —                                               |
+| **módulo**        | Bounded Context · Package by Feature | uma pasta por domínio de negócio, dentro de `modules/`      | —                                               |
 | **contrato**      | Porta (Ports & Adapters)             | tipos, schemas e regras puras do domínio                    | **não**                                         |
 | **leitura**       | Adaptador de saída                   | o único arquivo que fala com banco, rede, disco ou provedor | **sim**                                         |
 | **index**         | Fachada / API pública                | a única porta de entrada para quem é de fora                | não diretamente                                 |
@@ -56,7 +61,7 @@ Se o código responde a uma pergunta de negócio ("quem pode entrar?", "quanto f
 
 ```
 app/                          entradas: page.tsx e route.ts — finas, só chamam a fachada
-module/
+modules/
   <domain>/
     index.ts                  fachada: tudo que é público sai daqui
     contrato.ts               porta: tipos, schemas (zod), regras puras
@@ -73,7 +78,7 @@ script/                       scripts de execução (seção 6)
 ```
 <package>/
   entrypoints/                routers FastAPI e CLI — finos
-  module/
+  modules/
     <domain>/
       __init__.py             fachada
       contrato.py             porta: dataclasses/pydantic, funções puras
@@ -94,10 +99,10 @@ conteúdo sem abrir o arquivo.
 
 | regra                                      | certo                               | errado                                                       |
 | ------------------------------------------ | ----------------------------------- | ------------------------------------------------------------ |
-| inglês                                     | `module/session/`                   | `module/sessao/`                                             |
+| inglês                                     | `modules/session/`                  | `modules/sessao/`                                            |
 | diz o conteúdo                             | `script/deploy/`, `script/collect/` | `script/misc/`, `script/stuff/`, `script/novos/`             |
-| substantivo do domínio, não camada técnica | `module/billing/`                   | `module/utils/`, `module/helpers/`, `module/services/`       |
-| minúsculas, palavras separadas por hífen   | `module/consumer-app/`              | `module/ConsumerApp/`, `module/consumer_app/`                |
+| substantivo do domínio, não camada técnica | `modules/billing/`                  | `modules/utils/`, `modules/helpers/`, `modules/services/`    |
+| minúsculas, palavras separadas por hífen   | `modules/consumer-app/`             | `modules/ConsumerApp/`, `modules/consumer_app/`              |
 | sem data, sem versão, sem nome de pessoa   | `script/migrate/`                   | `script/migracao-2026-08/`, `script/v2/`, `script/fernando/` |
 
 Python usa `_` em vez de hífen nos pacotes importáveis (`consumer_app`), porque hífen não é
@@ -128,15 +133,15 @@ em inglês (Recomendado)». Este guideline estende a decisão a todo o ecossiste
 Seis regras de erro e uma de aviso. **O nome da regra é o mesmo em todo repositório**, para que o
 relatório de um seja legível por quem conhece o outro.
 
-| regra                              | em português claro                                            | severidade        |
-| ---------------------------------- | ------------------------------------------------------------- | ----------------- |
-| `sem-ciclo`                        | se A usa B, B não pode usar A — nem por caminho indireto      | erro              |
-| `fachada-de-fora`                  | quem está fora de `module/` só importa o `index` de um módulo | erro              |
-| `fachada-modulo`                   | um módulo só importa outro módulo pelo `index` dele           | erro              |
-| `porta-nao-conhece-adaptador`      | `contrato` nunca importa `leitura` nem nenhum adaptador       | erro              |
-| `so-o-adaptador-fala-com-o-banco`  | só adaptadores importam o cliente do banco                    | erro              |
-| `compartilhado-nao-conhece-modulo` | `shared/` nunca importa nada de `module/`                     | erro              |
-| `sem-orfao`                        | arquivo que ninguém importa é **perguntado**, nunca apagado   | **aviso, sempre** |
+| regra                              | em português claro                                             | severidade        |
+| ---------------------------------- | -------------------------------------------------------------- | ----------------- |
+| `sem-ciclo`                        | se A usa B, B não pode usar A — nem por caminho indireto       | erro              |
+| `fachada-de-fora`                  | quem está fora de `modules/` só importa o `index` de um módulo | erro              |
+| `fachada-modulo`                   | um módulo só importa outro módulo pelo `index` dele            | erro              |
+| `porta-nao-conhece-adaptador`      | `contrato` nunca importa `leitura` nem nenhum adaptador        | erro              |
+| `so-o-adaptador-fala-com-o-banco`  | só adaptadores importam o cliente do banco                     | erro              |
+| `compartilhado-nao-conhece-modulo` | `shared/` nunca importa nada de `modules/`                     | erro              |
+| `sem-orfao`                        | arquivo que ninguém importa é **perguntado**, nunca apagado    | **aviso, sempre** |
 
 `sem-orfao` nunca vira erro. Órfão no grafo de imports não prova código morto: `NUNCA-FAZER §1`
 registra 20 arquivos de produto apagados por serem "órfãos", e eram trabalho parado esperando voltar.
@@ -149,7 +154,7 @@ registra 20 arquivos de produto apagados por serem "órfãos", e eram trabalho p
 | `fachada-de-fora` / `fachada-modulo` | `forbidden` com `pathNot` para `index.ts` e `"^$1/"`         | contrato `protected`                   |
 | `porta-nao-conhece-adaptador`        | `forbidden`: de `contrato.ts` para `leitura.ts`              | contrato `forbidden`                   |
 | `so-o-adaptador-fala-com-o-banco`    | `forbidden`: de fora de `leitura.ts` para o cliente do banco | contrato `forbidden`                   |
-| `compartilhado-nao-conhece-modulo`   | `forbidden`: de `^shared/` para `^module/`                   | contrato `forbidden`                   |
+| `compartilhado-nao-conhece-modulo`   | `forbidden`: de `^shared/` para `^modules?/`                 | contrato `forbidden`                   |
 | `sem-orfao`                          | `from: { orphan: true }`, severidade `warn`                  | **não há equivalente** — medir à parte |
 
 A config de referência em TypeScript é a do `rotas` (`.dependency-cruiser.cjs`, PR #274), a primeira do
@@ -171,6 +176,13 @@ ecossistema. Três detalhes:
    Regra que muda de comportamento entre versões muda o veredito sem ninguém ter mudado o código.
 6. **Zero módulos cruzados é "não mediu", nunca "limpo".** O gate lê o resumo da ferramenta e
    sai com código próprio de "não pôde medir" quando nada foi cruzado.
+7. **A config mede as DUAS grafias da raiz** (`modules?/`). Fixar só uma transforma a outra em
+   ponto cego: o módulo escrito fora da convenção escapa de TODAS as regras de fronteira, em
+   silêncio — e o relatório sai verde. Custa um caractere e cobre a migração inteira.
+8. **A regra de transição lista as naturezas em inglês.** Onde a forma de dois níveis convive com
+   a de três, é o nome da natureza (`class|category|tool|panel|application|service`) que separa a
+   forma nova da antiga. Com a lista em português, módulo novo cai na regra do legado e é cobrado
+   em `warn` onde deveria ser `error` — o gate afrouxa exatamente onde deveria apertar.
 
 ---
 
@@ -262,7 +274,7 @@ A ordem é esta, e cada passo só começa quando o anterior terminou.
 4. **Provar que o gate morde** (seção 9), antes de confiar nele.
 5. **Pagar a dívida módulo a módulo.** Mover arquivo é `git mv`; nada é apagado por parecer órfão.
 6. **O baseline só encolhe.** Baseline que cresce é regressão, e o CI reprova.
-7. **Consolidar a raiz em `module/` por último.** No `rotas`, apontar o gate para a raiz certa antes da
+7. **Consolidar a raiz em `modules/` por último.** No `rotas`, apontar o gate para a raiz certa antes da
    hora produziria 261 reprovações contra 124: gate que reprova o que ninguém pode consertar hoje só
    ensina a ser ignorado.
 
@@ -320,24 +332,23 @@ Estas regras existem no ecossistema e **não aparecem em nenhuma fonte de mercad
 | todo cálculo e orquestração em Python; a tela só formata | skill `$modular`, Lei 6                                          | só em repositório com `modular.json` |
 | teto de 400 linhas por arquivo                           | skill `$modular`, Lei 1 (caso medido: rota de 2.194 → 33 linhas) | só em repositório com `modular.json` |
 | determinismo e idempotência medidos por dupla execução   | skill `$modular`, Leis 3 e 4                                     | só em repositório com `modular.json` |
-| raiz de módulos no singular, `module/`                   | ordem do dono, 15/09/2026: «Os módulos tem que estar em module/» | **todos** os repositórios            |
 
-A raiz `module/` é a única regra da casa que vale para todos: o mercado usa `modules/` ou
-`src/modules/`, e o singular é decisão do dono. As outras três, este guideline **não impõe**. Em 15/09/2026, os repositórios com `modular.json` são
+Este guideline **não impõe** nenhuma das três. Em 15/09/2026, os repositórios com `modular.json` são
 `superadmin`, `rotas`, `tools` e `Assai`; neles as duas coisas valem juntas.
 
 ---
 
 ## 12. Onde o ecossistema parte (medido em 15/09/2026)
 
-| medida                                              | valor                                                                  |
-| --------------------------------------------------- | ---------------------------------------------------------------------- |
-| repositórios                                        | 28                                                                     |
-| repositórios sem nenhum módulo                      | 24                                                                     |
-| módulos existentes                                  | 35 — 21 em `modules/`, 14 em `lib/modulos/`, nenhum ainda em `module/` |
-| scripts em `scripts/`, `script/`, `bin/` e `tools/` | 1.652 — `atlas` 499, `rotas` 257, `scraping` 168, `superadmin` 135     |
-| nomes distintos de pasta em português               | ao menos 74 (heurística; o número real é maior)                        |
-| repositórios com ferramenta de fronteira            | `rotas` (PR #274) e `superadmin` (piloto, PR #176)                     |
+| medida                                              | valor                                                                                                                                                   |
+| --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| repositórios                                        | 28                                                                                                                                                      |
+| repositórios sem nenhum módulo                      | 24                                                                                                                                                      |
+| módulos existentes                                  | 35 — 21 em `modules/`, 14 em `lib/modulos/`                                                                                                             |
+| grafia da raiz                                      | `modules/`, no plural, desde 16/09/2026 — a ordem de 15/09 fixava o singular, e as duas datas ficam registradas para o histórico não parecer incoerente |
+| scripts em `scripts/`, `script/`, `bin/` e `tools/` | 1.652 — `atlas` 499, `rotas` 257, `scraping` 168, `superadmin` 135                                                                                      |
+| nomes distintos de pasta em português               | ao menos 74 (heurística; o número real é maior)                                                                                                         |
+| repositórios com ferramenta de fronteira            | `rotas` (PR #274) e `superadmin` (piloto, PR #176)                                                                                                      |
 
 ---
 
