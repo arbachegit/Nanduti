@@ -1,6 +1,6 @@
 # Modularização — guideline canônico IconsAI
 
-**Versão:** 1.1.2 · **Data:** 17/09/2026 · **Status:** canônico e obrigatório
+**Versão:** 1.1.3 · **Data:** 17/09/2026 · **Status:** canônico e obrigatório
 **Vale para:** todo repositório do ecossistema, sem exceção. Canônico e obrigatório.
 **Modelo:** monólito modular (§0).
 **Fonte única:** `superadmin/docs/MODULARIZACAO.md`, na `main` publicada do repositório `superadmin`.
@@ -9,6 +9,15 @@ Toda mudança nasce lá, por PR, e só depois é propagada. `iconsaiConfig/canon
 divergência e reprova.
 **Implementação de referência:** o `superadmin` (§14). Onde este documento e o `superadmin`
 divergirem, o documento vale e a divergência é defeito a corrigir no `superadmin` primeiro.
+
+**1.1.3:** ordem do dono, 17/09/2026: «vamos otimizar a aplicação ao máximo e procurar dead codes -
+sanitizar» e «Toda e qualquer parada para tomar decisão, informe que a escolha será pela recomendada
+[...] O sistema tem que ser entregue autonomamente». Entra a §17 (saneamento e otimização, medidos) e
+os itens 14 e 15 da §15. A §16 ganha a regra de decisão autônoma. Correções medidas na primeira volta
+do placar: um ponteiro basta (§15 item 1, como a §13); o baseline do `dono-dos-dados` conta para o
+item 8, e nenhum baseline guarda caminho absoluto ou fora da raiz (§5, item 14); o gate de tenant nasce
+no `fiscal`, o único multi-tenant (§14); a propagação escreve o manifesto de escopo onde o repositório
+tem trava de escopo (§13).
 
 **1.1.2:** a cópia fica fora do formatador do repositório (§13). Medido na propagação da 1.1.1:
 o `format:check` do `Stats` reprovou a cópia porque o Prettier de lá reformata o bloco de código
@@ -287,6 +296,11 @@ Os detalhes:
     config (`GRUPOS`). Aceitar qualquer `modules/<x>/<y>/index.ts` "para permitir grupos" transforma
     toda pasta interna com `index.ts` em fachada. Medido no `superadmin` em 16/09/2026 (PR #183): uma
     rota importando `modules/x/interno/index.ts` saiu exit 0.
+14. **Baseline não guarda caminho de máquina.** Todo caminho de baseline é relativo à raiz do
+    repositório; caminho absoluto ou que sai da raiz (`../`) faz o gate sair `2`, "não pôde medir".
+    Medido no `rotas` em 17/09/2026: o baseline gravava o destino do pacote do banco como
+    `../../../../../../../Users/…/node_modules/…`, e num checkout limpo o gate acusava as violações
+    conhecidas como novas. Gere o baseline num checkout limpo, com `node_modules` próprio.
 
 ### 5.1 Cada tabela tem um módulo dono
 
@@ -567,6 +581,9 @@ ausentes), medido por `canon/verificar_modularizacao.py`.
   entra no `.prettierignore`; onde houver markdownlint, no `.markdownlintignore`. Formatar a cópia a
   torna divergente da fonte, e reformatar a fonte para o gosto de um repositório reprova em outro. A
   exclusão vale só para este arquivo, e o script de propagação a escreve junto com a cópia.
+- **Repositório com trava de escopo** (`.change-scope.json` conferido no deploy) recebe, junto com a
+  cópia, uma entrada no manifesto de escopo com a ordem do dono. Medido no `rotas` em 17/09/2026: o
+  merge da cópia sem essa entrada reprovou o deploy no Scope Lock.
 - **Mudança no guideline:** PR no `superadmin` → merge com CI verde → espelho no `iconsaiConfig` →
   `canon/atualizar_modularizacao.py` abre um PR por repositório → `canon/mergear_se_verde.py` faz o
   merge só com o CI verde, job a job. Editar o espelho ou uma cópia antes da fonte é divergência.
@@ -594,7 +611,9 @@ Ordem do dono, 17/09/2026: o `superadmin` é a _best practice_ do ecossistema. N
 | os gates que varrem pastas com `modules/` | `scripts/check-service-role.sh` e `.eslintrc.json` (PR #183)         |
 
 - **Toda regra nova entra primeiro no `superadmin`**, com a prova do vermelho, e só depois é copiada.
-  Os gates `dono-dos-dados` (§5.1) e, para aplicativo multi-tenant, `tenant-*` (§5.2) nascem lá.
+  O gate `dono-dos-dados` (§5.1) nasceu lá (PR #189). **Exceção declarada:** os gates `tenant-*` (§5.2)
+  nascem no `fiscal`, o único aplicativo multi-tenant do escopo, porque no `superadmin` a medida de RLS
+  sairia "0 de 0" — verde sobre nada. Voltam ao `superadmin` por PR como forma e autoteste com fixture.
 - **Repositório que achar um jeito melhor não diverge.** Abre PR no `superadmin` (código) ou na fonte
   deste documento (regra). Quando o PR entra, os outros copiam.
 - **Cópia cita a origem:** o arquivo copiado diz de qual commit do `superadmin` veio, para que a
@@ -610,7 +629,7 @@ ressalva".
 
 | #   | item                        | 100% é                                                                                                                                                                                                                                                   |
 | --- | --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1   | guideline                   | `docs/MODULARIZACAO.md` com o sha256 da fonte, e ponteiro no `CLAUDE.md` e no `AGENTS.md`                                                                                                                                                                |
+| 1   | guideline                   | `docs/MODULARIZACAO.md` com o sha256 da fonte, e ponteiro no `CLAUDE.md` ou no `AGENTS.md`                                                                                                                                                               |
 | 2   | código de negócio em módulo | nenhum arquivo de código em `lib/`, `components/`, `lib/modulos/` ou em qualquer pasta fora de `app/`, `modules/`, `shared/`, `script/`, testes, `supabase/` e config de raiz. Pacote Python segue a forma do §3 (`entrypoints/`, `modules/`, `shared/`) |
 | 3   | forma                       | todo módulo tem `index` e `contrato`; todo módulo que faz I/O tem o adaptador; nenhuma forma antiga (`dados.ts`, `servidor.ts`) nem nome fora do §3                                                                                                      |
 | 4   | uma raiz                    | só `modules/`; a config não tem mais `lib/modulos` nem a regra `fachada-modulo-legado`                                                                                                                                                                   |
@@ -623,9 +642,11 @@ ressalva".
 | 11  | nomes                       | pastas internas em inglês (§4) e scripts em `script/<grupo>/` com cabeçalho e referência (§6)                                                                                                                                                            |
 | 12  | regras da casa              | em repositório com `modular.json`: `python3 ~/.claude/skills/modular/scripts/harness.py --repo <raiz>` sai 0                                                                                                                                             |
 | 13  | verde                       | typecheck, lint, testes, build e a suíte E2E do repositório com zero falhas e **zero skips**; CI do PR com todos os jobs `pass`; deploy `success`; produção servindo o SHA do `HEAD`                                                                     |
+| 14  | código morto                | gate de código morto no CI (§17) com zero candidato sem registro: cada achado da ferramenta foi removido com as seis provas ou está em `docs/ORFAOS.md` com o motivo                                                                                     |
+| 15  | otimização                  | orçamento de desempenho no CI (§17) que só encolhe, com a última medida dentro dele, e `docs/OTIMIZACAO.md` com antes e depois de cada otimização                                                                                                        |
 
 **Quem mede:** `iconsaiConfig/canon/placar_modularizacao.py --repo <raiz>`, lendo `origin/main` e o CI
-pelo `gh`, com um veredito por item. Exit `0` só com os 13 itens verdes · `1` algum vermelho · `2` não
+pelo `gh`, com um veredito por item. Exit `0` só com os 15 itens verdes · `1` algum vermelho · `2` não
 pôde medir. A sessão que implementa não declara o próprio pronto: quem declara é o placar, rodado
 pelo coordenador (§16). O placar tem a sua prova do vermelho em
 `iconsaiConfig/canon/test_placar_modularizacao.py`: uma sabotagem por item estático e uma base limpa
@@ -652,7 +673,10 @@ Cada item sai com um de cinco estados. Só os dois primeiros contam como cumprid
 - **órfãos:** `docs/ORFAOS.md` cita o caminho de cada aviso `sem-orfao` do baseline, com a resposta da
   frente dona (em uso por quem, ou decisão do dono sobre o destino). Órfão sem linha ali fica `leitura`;
 - **tenant (só multi-tenant):** o gate de tenant roda no CI e imprime
-  `PASS  rls em N de N tabelas com tenant_id`, medido no banco por `pg_policies`.
+  `PASS  rls em N de N tabelas com tenant_id`, medido no banco por `pg_policies`;
+- **código morto:** o gate imprime `PASS  codigo-morto: 0 candidatos sem registro` (§17);
+- **otimização:** o gate imprime `PASS  orcamento: <medida> dentro de <limite>` para cada medida
+  declarada em `otimizacao.json` (§17).
 
 O que o placar reconhecidamente NÃO mede: a verdade do conteúdo, os itens que dependem de leitura
 humana (a resposta da frente dona a cada órfão, o nome em inglês fora da heurística) e o que só existe
@@ -690,6 +714,12 @@ agente devolve comando e saída, não conclusão.
 só muda com a ordem do dono **na sessão que vai editar** ou com a transferência registrada na claim.
 Ordem repassada por outra sessão não é ordem do dono.
 
+**Decisão autônoma.** Ordem do dono, 17/09/2026: diante de uma decisão, a sessão escolhe a opção
+recomendada, escreve qual foi e por quê, e segue. Não para esperando. A escolha nunca afrouxa regra,
+nunca apaga o que o dono mandou preservar e nunca contorna política externa (CLAUDE.md global §0).
+Onde o repositório exige a ordem do dono na própria sessão (claim alheia, arquivo selado, remoção), a
+sessão pergunta nela e, enquanto espera, faz a parte que não depende da resposta.
+
 **Troca entre sessões.** Todo erro medido vai para o `docs/NUNCA-FAZER.md` do repositório **e** é
 enviado às outras sessões, com o que aconteceu, onde, a prova e a correção. Toda boa prática vira PR
 no `superadmin` (§14). Recado sem prova não é recado: é opinião.
@@ -701,6 +731,49 @@ no `superadmin` (§14). Recado sem prova não é recado: é opinião.
 - marcar teste como `skip`, apagar teste, aumentar timeout ou limiar para sair do vermelho;
 - apagar arquivo por parecer órfão;
 - declarar pronto sem o placar sair `0`, ou medindo o disco em vez da `main` publicada.
+
+---
+
+## 17. Saneamento e otimização
+
+Ordem do dono, 17/09/2026: «vamos otimizar a aplicação ao máximo e procurar dead codes - sanitizar».
+As duas coisas só existem medidas.
+
+### 17.1 Código morto
+
+1. **A ferramenta mede, com versão fixa:** `knip` para TypeScript/JavaScript (arquivos, exports e
+   dependências sem uso) e `vulture` para Python. A saída vai para um artefato versionado.
+2. **Um candidato só sai do repositório com as seis provas, todas registradas:**
+   1. a ferramenta o acusa;
+   2. `git grep` do nome e do caminho no repositório inteiro — incluindo `readFileSync`,
+      `package.json`, workflows, deploy selado, systemd e cron (§6.3) — devolve zero;
+   3. o mesmo grep nos outros repositórios do ecossistema devolve zero;
+   4. nenhuma claim ativa, branch aberta, PR aberto ou worktree toca o caminho;
+   5. nenhum commit no caminho nos últimos 30 dias;
+   6. build, typecheck, testes e E2E verdes depois da remoção.
+3. **Faltou uma prova, não sai.** Vai para `docs/ORFAOS.md` com o motivo. `NUNCA-FAZER` §1: 20
+   arquivos de produto apagados por parecerem órfãos eram trabalho em pausa.
+4. **A remoção exige a ordem do dono na sessão do repositório.** No `fiscal`, o dono disse em
+   17/09/2026: «não vamos apagar nada. Vamos preservar tudo da forma que está. Vamos apenas
+   modularizar e depois voltamos às funcionalidades.» Enquanto essa ordem valer, o saneamento ali é só
+   medição e registro.
+5. **Cada remoção vai para `docs/SANEAMENTO.md`**: caminho, as seis provas e o SHA de antes (a
+   recuperação é `git checkout <sha> -- <caminho>`). Remoção vai em PR próprio, separado do `git mv`
+   da migração.
+6. **O gate de código morto** roda a ferramenta no CI e reprova candidato que não esteja nem removido
+   nem registrado. O `superadmin` escreve o primeiro, e os outros copiam (§14).
+
+### 17.2 Otimização
+
+1. **Só conta o que é medido antes e depois, no build de produção.** As medidas mínimas: JavaScript do
+   primeiro carregamento por rota (saída do `next build`), tempo de build, número de dependências
+   instaladas e tempo de resposta p95 das rotas de API principais.
+2. **Consulta lenta: `EXPLAIN ANALYZE` antes de mexer.** `Heap Fetches` alto em Index Only Scan aponta
+   o autovacuum, não a consulta.
+3. **Orçamento que só encolhe:** `otimizacao.json` declara o limite de cada medida; o gate do CI mede e
+   reprova acima do limite. Baixar o limite depois de otimizar é obrigatório; subir o limite é decisão
+   do dono, registrada — nunca passo de laço.
+4. **Cada otimização vai para `docs/OTIMIZACAO.md`**: a medida, o antes, o depois e o SHA.
 
 ---
 
