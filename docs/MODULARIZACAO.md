@@ -1,6 +1,6 @@
 # Modularização — guideline canônico IconsAI
 
-**Versão:** 1.1.4 · **Data:** 17/09/2026 · **Status:** canônico e obrigatório
+**Versão:** 1.1.5 · **Data:** 17/09/2026 · **Status:** canônico e obrigatório
 **Vale para:** todo repositório do ecossistema, sem exceção. Canônico e obrigatório.
 **Modelo:** monólito modular (§0).
 **Fonte única:** `superadmin/docs/MODULARIZACAO.md`, na `main` publicada do repositório `superadmin`.
@@ -9,6 +9,19 @@ Toda mudança nasce lá, por PR, e só depois é propagada. `iconsaiConfig/canon
 divergência e reprova.
 **Implementação de referência:** o `superadmin` (§14). Onde este documento e o `superadmin`
 divergirem, o documento vale e a divergência é defeito a corrigir no `superadmin` primeiro.
+
+**1.1.5:** as lições da segunda metade do primeiro dia. A regra que atravessa quase todas: **o que não
+foi medido não sai nem como verde nem como vermelho**. A §1 registra que a mesma regra escrita duas
+vezes diverge em silêncio. A §5 ganha os itens 22 e 23 (ref de comparação ausente sai `2`; gate que não
+pôde medir nunca usa o código de violação) e amplia o 13 (grupo declarado vale para todos os gates), o
+16 (comentário sai do texto, string continua contando) e o 19 (procurar por `limit(` não acha o corte
+em 1.000). A §5.1 ganha o embed do PostgREST, a tabela em variável e o `db:check` que exige a tabela
+declarada. A §9 passa a exigir que a sabotagem MUDE A SAÍDA daquela medição, e que prova de contagem
+use caminho diferente do que a tela usa. A §13 põe o repositório que hospeda o medidor no mesmo regime
+dos medidos e conserta a propagação contra ruleset estrito e manifesto alheio. A §15 fixa metadado de
+governança como documentação e o item 13 como ausência de job, não do resumo. A §16 troca a restauração
+de dado do dono por dado efêmero do teste. A §17.1 separa dívida herdada de dívida recém-criada e cobra
+o artefato oculto no runner.
 
 **1.1.4:** as lições medidas no primeiro dia do programa, nas sessões `superadmin-7a`, `rotas-06`,
 `fiscal-ee`, `app-87` e `app-e2`, com prova de cada uma. A §3 ganha a forma do módulo sem banco, a
@@ -124,6 +137,13 @@ Os dois continuam sendo do aplicativo inteiro.
 Se o código responde a uma pergunta de negócio ("quem pode entrar?", "quanto foi consumido?",
 "este commit pode ir ao ar?"), ele pertence a um módulo.
 
+**A mesma regra escrita em dois lugares diverge em silêncio.** No `rotas` (PR #331, 17/09/2026), a
+semeadura do grafo por rota criava o firewall do gate e a do CLI não: mesmo domínio, duas
+implementações, e nada avisava. Regra duplicada não é redundância, é duas verdades — e é motivo
+suficiente para o código virar módulo, com um caminho só. Depois de unificar, o teste afirma a **regra**
+(«esta situação fictícia nunca liga à fonte»), não o caminho: teste amarrado a um dos dois caminhos
+volta a deixar o outro divergir.
+
 ---
 
 ## 2. As seis peças, com o nome de mercado ao lado
@@ -172,6 +192,11 @@ decisões são de 17/09/2026 (`superadmin-7a`, placar item 12), e a skill `$modu
 **Página de cliente que monta telas de vários domínios** divide em duas: `page.tsx` de SERVIDOR importa
 as fachadas e passa as telas como elementos (`ReactNode`) para um shell `"use client"` que guarda só o
 estado das abas. Medido no `rotas` em 17/09/2026 (`app/monitor/page.tsx`, 81353304).
+
+**Módulo com mais de um adaptador** é forma aceita quando um só passaria do teto de linhas: além do
+`leitura.ts` do domínio, um `<parte>/leitura.ts` por parte. Medido no `superadmin` em 17/09/2026
+(`whatsapp-conversa`). Cada adaptador continua sendo o único caminho ao banco da sua parte; dividir
+para caber não vira porta nova.
 
 **Componente de cliente usado por muitas telas** (o `CrawlerPanel` do `rotas`, dentro de uma view de
 cliente usada por 27 abas) não alcança o módulo por prop. A forma é um **contexto** em `shared/ui/`,
@@ -324,7 +349,12 @@ Os detalhes:
 13. **Grupo é declarado por nome.** `modules/<grupo>/<dominio>/` só é aceito para grupo listado na
     config (`GRUPOS`). Aceitar qualquer `modules/<x>/<y>/index.ts` "para permitir grupos" transforma
     toda pasta interna com `index.ts` em fachada. Medido no `superadmin` em 16/09/2026 (PR #183): uma
-    rota importando `modules/x/interno/index.ts` saiu exit 0.
+    rota importando `modules/x/interno/index.ts` saiu exit 0. **A lista de grupos é a mesma para todos
+    os gates do repositório** — fronteira, `dono-dos-dados` e a skill `$modular` leem a mesma
+    declaração. Medido no `superadmin` em 17/09/2026 (#234): com o grupo não declarado, o
+    `dono-dos-dados` tratou `modules/<grupo>` como um dono só e saiu verde, e o validador da skill
+    mediria `modules/whatsapp/` como módulo sem contrato. Grupo declarado em um gate e desconhecido no
+    outro é fronteira que existe num relatório e não no outro.
 14. **Baseline não guarda caminho de máquina.** Todo caminho de baseline é relativo à raiz do
     repositório; caminho absoluto ou que sai da raiz (`../`) faz o gate sair `2`, "não pôde medir".
     Medido no `rotas` em 17/09/2026: o baseline gravava o destino do pacote do banco como
@@ -334,9 +364,26 @@ Os detalhes:
     `superadmin` em 17/09/2026 (PR #192): com o cliente do banco movido para `shared/database/`, o
     `check-service-role`, o ESLint e a fronteira saíram exit 0 com a sabotagem no lugar. Toda mudança
     de caminho refaz a sabotagem de cada gate que cita o caminho antigo, antes do merge.
-16. **Gate de texto remove comentário e string antes de casar.** O mesmo PR acendeu falso positivo em
-    comentário (`fetch("/api/…")` citado em `base-path.ts`), e o gate de catch vazio acusou o comentário
-    que descrevia o próprio defeito (#193). Mascarar é parte do gate, com um caso no autoteste.
+16. **Gate de texto remove comentário antes de casar; string depende do que ele procura.**
+    Comentário sai SEMPRE, porque não executa. O mesmo PR acendeu falso positivo em comentário
+    (`fetch("/api/…")` citado em `base-path.ts`), o gate de catch vazio acusou o comentário que
+    descrevia o próprio defeito (#193), e em 17/09/2026 o placar acusou `modules/dod/teste` de
+    «acessa banco e não tem `leitura.ts`» por uma linha de documentação que citava `superAdminDb()`
+    — o módulo declara `TABELAS = []` e não toca o banco, e o repositório perdeu um item verde por
+    uma frase.
+
+    String NÃO tem resposta única, e confundir os dois casos é como a regra errou antes:
+
+    - **O marcador procura uma CONSTRUÇÃO de código** (`catch {}`, `fetch(`): a string que contém
+      esse texto é citação, não construção. Mascara. Medido no gate de catch vazio (`superadmin`
+      #193).
+    - **O marcador procura o OPERANDO** (o nome da tabela em `.from("<t>")`): o literal dentro da
+      string É o dado que se mede. Conta. A saída do caso legítimo é declarar, nunca esconder — o
+      `dono-dos-dados` marca a linha como amostra e imprime a contagem de amostras no resumo
+      (desenho do `superadmin`, confirmado no `rotas` por rotas-06 em 17/09/2026).
+
+    Mascarar é parte do gate, e cada um dos dois lados precisa do seu caso no autoteste: sem o
+    segundo, esconder string vira ponto cego — nome de tabela em string deixaria de ser acesso.
 17. **Baseline pareia o que mudou de lugar.** `git mv` de arquivo com violação conhecida, ou dar dono a
     uma tabela, muda a chave da entrada. O gate pareia 1 para 1 a entrada nova com a que sumiu (mesma
     regra e mesmo arquivo, ou mesma tabela), e o total nunca cresce. Medido no `superadmin` (#197,
@@ -348,7 +395,11 @@ Os detalhes:
 19. **Leitura do PostgREST corta em 1.000 linhas, qualquer que seja o `limit`.** Pedido de 5.000
     recebeu 1.000 e respondeu `truncado: false` (`superadmin`, histórico de auditoria, 17/09/2026). Toda
     leitura que pode passar de 1.000 anda em páginas por `range` e declara `truncado` medindo
-    `limite + 1`; a prova usa limite acima de 1.000.
+    `limite + 1`; a prova usa limite acima de 1.000. **Procurar por `limit(` não acha esses casos:**
+    sem `limit` o teto é o mesmo 1.000, então o que se procura é leitura de acervo inteiro, com ou sem
+    `limit`. Medido no `superadmin` (#244 e #245, 17/09/2026): três leitores da mesma tabela — a aba
+    Testes, a Prontidão e os KPIs — diziam 1.000 com 1.875 no banco, e a Prontidão agrupava sem `limit`
+    nenhum.
 20. **Conflito em manifesto de escopo se resolve manifesto por manifesto.** No rebase do `rotas` #316,
     copiar a lista de um manifesto para os outros apagou caminhos únicos de outras frentes (uma
     migration, `next.config.mjs`, um spec); foi visto no diff antes do merge. O diff do arquivo de
@@ -357,6 +408,19 @@ Os detalhes:
     evento, e-mail ou produção roda antes com o efeito trocado por um falso e o resultado lido.
     Medido no `superadmin` em 17/09/2026: a vigia do GitHub, rodada direto contra o banco, gravou dois
     eventos permanentes de repositórios que não são software.
+22. **Gate que compara com `origin/main` busca a ref que falta, e sem ela sai `2`.** No CI de PR o
+    checkout é raso e a ref não existe. Medido no `superadmin` (#202 a #227, 17/09/2026): o gate
+    imprimia «não medido» e saía `0` em **todo** PR — verde por não ter olhado. O gate faz
+    `git fetch --no-tags --depth=1 origin +refs/heads/main:refs/remotes/origin/main` e, se ainda assim
+    não houver ref, sai `2`. A prova é `gh run view <PR> --log | grep "não medido"` vazio.
+23. **Gate que não conseguiu medir sai por código próprio, nunca pelo código de violação.** Cinza não é
+    verde, e cinza também não é vermelho. Medido em 17/09/2026: `verificar_modularizacao.py` recebeu um
+    caminho de espelho que não existia, não leu nada, e imprimiu «espelho DIVERGE da fonte» com exit `1`
+    — o espelho estava idêntico à fonte, byte a byte, na `main` publicada dos dois repositórios. A
+    leitura que falhou tinha virado conteúdo vazio e sido comparada. Vermelho por ausência de medição
+    manda alguém consertar o que está certo, e custa mais que o falso verde porque parece trabalho
+    legítimo. Os três estados são provados com o mesmo código: violação real vermelha, caso legítimo
+    verde, leitura impossível no código de "não pôde medir" (`iconsaiConfig` #36).
 
 ### 5.1 Cada tabela tem um módulo dono
 
@@ -396,8 +460,25 @@ dos dois módulos e é declarada nele: a decisão fica escrita, e não espalhada
 **Schema não é dono.** O schema (`raw`, `staging`, `analytics`, `public`) diz a camada do dado. O
 módulo dono diz quem o lê e o escreve. Um não substitui o outro.
 
+**O embed do PostgREST é acesso.** `.select("…, entrega:superadmin_dod_entregas(app,frente)")` lê outra
+tabela sem aparecer em `.from(`: no `superadmin` (etapa 7, 17/09/2026) eram três leituras de uma tabela
+de outro dono, invisíveis ao gate. Todo `nome(` dentro do texto de um `select`, com `nome` sendo tabela
+conhecida (das migrations ou de algum `TABELAS`), conta como acesso. A prova do vermelho é um embed de
+tabela com dono, feito de um arquivo de fora.
+
 **Função genérica que recebe a tabela por parâmetro** (`from(table)`) sai do relatório como
-`tabela-nao-resolvida`, nomeada, e não como limpa; a migração a substitui pela fachada do dono.
+`tabela-nao-resolvida`, nomeada, e não como limpa; a migração a substitui pela fachada do dono. Tabela
+que o gate não enxerga é, na prática, tabela sem dono. O conserto é o literal na chamada ou a fachada
+do dono — **nunca declarar a variável** em `TABELAS` (`rotas` #331, 17/09/2026).
+
+**O gate lê os mesmos `GRUPOS` da fronteira** (§5, item 13): `modules/<grupo>/<domínio>` são donos
+separados. Sem isso o grupo inteiro vira um dono só e o gate sai verde sobre dois módulos que leem a
+mesma tabela (`superadmin` #234).
+
+**Tabela declarada em `TABELAS` existe em produção.** O `db:check` do repositório exige, para cada
+tabela declarada, a existência no banco. Medido no `superadmin` em 17/09/2026: a migration `0042` era
+citada pelo código e não fora aplicada — `superadmin_whatsapp_pessoas` não existia (`to_regclass` nulo)
+e nada acusava até a consulta falhar em produção.
 
 **Tabela de mesmo nome em bancos diferentes** (`audit_logs` existe em três) não é declarada pelo nome
 solto: o gate identifica tabela só por nome, e declarar juntaria três donos num. Declare
@@ -449,7 +530,8 @@ modules/<domain>/
   tenant; um membro de outra empresa recebia PDFs, valores e impostos. No `PATCH`, um id de outro tenant
   fazia o gatilho reescrever o preço do outro. RLS e `pg_policies` passavam: **gate de policy não prova o
   ramo da rota**. A prova é E2E nos dois sentidos, com um membro forjando o cabeçalho de tenant, vermelho
-  no código antigo e verde no novo.
+  no código antigo e verde no novo. A função de escopo tem nome próprio e único (`resolveReadScope` no
+  `fiscal`), e o gate textual acusa leitura de tabela de tenant feita fora dela.
 - **O tenant seed é um predicado nomeado** em `shared/tenant/` (`ehTenantSeed(id)`), nunca comparação
   espalhada: o `fiscal` tinha 9 comparações com `DEFAULT_TENANT_ID` em 4 arquivos que o grep por literal
   não achava. Comparar ou fazer `switch` com uma constante de tenant fora de `shared/tenant/` e de
@@ -507,6 +589,14 @@ Os scripts npm (`npm run test`, `npm run build`) continuam existindo e chamam es
    commit e provar que o deploy encontra o arquivo. Medido no `rotas`: renomear um coletor sem
    mexer na lista do deploy e no mapa de disparo faz a sincronização apagar o arquivo antigo e o
    job falhar como `script_not_found`, sem erro no deploy.
+7. **Antes de mover um arquivo, procure o caminho literal, não só o import.** `readFileSync` por
+   caminho não aparece no typecheck: no `superadmin` (etapa 7b, 17/09/2026),
+   `scripts/despachar-decisoes.mjs` lia `lib/superadmin/dod-bloqueios.ts` por caminho, e o compilador
+   nada dizia. O `git grep` do caminho antigo entra no mesmo commit do `git mv`.
+8. **Resolver de TypeScript de script devolve o arquivo, não a pasta.** O
+   `scripts/resolver-ts.mjs` do `superadmin` devolvia a pasta de um módulo antes de tentar o
+   `index.ts`, e o script morria em `EISDIR` (conserto no #232, 17/09/2026). Repositório que copiou o
+   resolver confere a mesma ordem.
 
 ---
 
@@ -584,6 +674,19 @@ raiz de módulos, e 53 violações vindas de `app/api/` estavam invisíveis.
 inválida que aborta é indistinguível de um repositório sem violações. E um caso legítimo — um
 módulo importando outro pela fachada — tem de continuar verde: gate que reprova o caminho certo
 obriga a desligá-lo.
+
+**A sabotagem tem de MUDAR A SAÍDA daquela medição.** Afirmar a contagem de ocorrências antes de
+substituir é necessário e não basta. Medido no `superadmin` (etapa 7b, 17/09/2026): na segunda
+armadilha a contagem foi afirmada, a substituição aconteceu e a saída não mudou, porque o ponto
+sabotado — um dedupe — não é exercitado pelos dados de hoje. **Saída igual é um resultado**, não um
+detalhe: ou o ponto não é exercitado, ou o comparador é cego. Nos dois casos, troque o ponto e rode de
+novo; seguir com verde é assinar o que não foi provado.
+
+**Prova de contagem usa um caminho diferente do que a tela usa.** Medido no `superadmin` (#244 e #245,
+17/09/2026): dois specs E2E existiam para pegar o truncamento em 1.000 linhas e estavam **verdes por
+construção**, porque liam o banco com a MESMA consulta truncada da tela. Teste que repete a consulta do
+código sob teste compara o defeito consigo mesmo — e verde assim é pior que teste nenhum, porque ocupa
+o lugar. A contagem se prova por `count` no servidor, SQL direto ou paginação explícita.
 
 ---
 
@@ -665,6 +768,23 @@ ausentes), medido por `canon/verificar_modularizacao.py`.
 - **Mudança no guideline:** PR no `superadmin` → merge com CI verde → espelho no `iconsaiConfig` →
   `canon/atualizar_modularizacao.py` abre um PR por repositório → `canon/mergear_se_verde.py` faz o
   merge só com o CI verde, job a job. Editar o espelho ou uma cópia antes da fonte é divergência.
+- **A propagação não reivindica registro só-acréscimo que já existe.** `docs/ORFAOS.md`,
+  `docs/SANEAMENTO.md` e `docs/OTIMIZACAO.md` presentes no repositório ficam fora do manifesto de escopo
+  do PR de propagação. Medido em 17/09/2026 (`iconsaiConfig` #32): reivindicá-los colidiu com a claim da
+  frente dona, e o `rotas` acusou a colisão no #317 — o job de merge parou com nada mergeado.
+- **Manifesto que mudou na `main` se refaz, não se reescreve.** Quando `ESCOPO.md` recebeu blocos de
+  outras frentes, `update-branch` falha como `DIRTY`. A ferramenta refaz o commit sobre a `main` atual
+  (a cópia mais o bloco próprio no fim) e nunca reescreve bloco alheio (`fiscal` #28, 17/09/2026).
+- **Merge contra ruleset estrito espera o check existir.** Repositório no pipeline canônico recusa o
+  merge enquanto `pipeline / pipeline-ok` ainda não foi reportado, e recusa de novo quando o branch fica
+  `BEHIND`. O job espera o check exigido aparecer e ficar `success`; em `BEHIND`, faz
+  `update-branch --rebase` e espera o novo CI (`knowme` #8, 17/09/2026).
+- **O repositório que hospeda o medidor entra no mesmo regime dos medidos.** Medido em 17/09/2026: o
+  `iconsaiConfig` tinha um workflow só (`sync-skills-page.yml`) e nenhum gate — os PRs #32 a #36, que
+  mudam o placar e o verificador, entraram na `main` com «no checks reported». Defeito ali não derruba
+  deploy nenhum: levanta ou derruba o veredito de todos os repositórios, em silêncio. O canon expõe uma
+  porta única de gates (`python3 canon/testes.py`, que chama a bateria do placar e a do verificador) e
+  ela é exigida pelo mesmo ruleset dos demais.
 - `iconsaiConfig/canon/verificar_modularizacao.py` mede todos os repositórios e classifica cada um como
   `igual`, `divergente`, `ausente` ou `nao_medido`. **100% só é declarado quando todos são `igual`.**
   `nao_medido` não conta como cumprido, e worktree não conta como repositório.
@@ -702,8 +822,8 @@ Ordem do dono, 17/09/2026: o `superadmin` é a _best practice_ do ecossistema. N
 ## 15. Definição de pronto: quando um repositório está 100% modularizado
 
 Um repositório só é declarado **100% modularizado** quando **todos** os itens abaixo são medidos na
-`main` publicada e passam. Item não medido é cinza, e cinza não é verde. Não existe "pronto com
-ressalva".
+`main` publicada e passam. Item não medido é cinza, cinza não é verde — e cinza também não é vermelho
+(§5, item 23). Não existe "pronto com ressalva".
 
 | #   | item                        | 100% é                                                                                                                                                                                                                                                   |
 | --- | --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -751,10 +871,15 @@ Cada item sai com um de cinco estados. Só os dois primeiros contam como cumprid
   de `scripts/harness/fronteira_modulos.py` do `superadmin`;
 - **produção:** `https://<domínio>/build-info.txt` começa pelo SHA do commit publicado. Se produção
   serve um ancestral e daquele commit até o medido só mudou documentação (`.md` ou `docs/`), o item não
-  reprova por isso: o guard de deploy pula push só de documentação de propósito;
+  reprova por isso: o guard de deploy pula push só de documentação de propósito. **Metadado de
+  governança conta como documentação**: `.change-scope.json`, `.agent-claims.json` e os ignores do
+  formatador não publicam nada (`iconsaiConfig` #33, `rotas` #317, 17/09/2026);
 - **deploy:** vale o JOB de publicação com `success`, não o run. No pipeline canônico o `Publish` pode
   sair `skipped` com o run `success` (commit superado, push só de documentação), e nada foi publicado;
-- **E2E:** o resumo do Playwright no log do CI (`N passed`, `N skipped`, `N failed`);
+- **E2E:** o resumo do Playwright no log do CI (`N passed`, `N skipped`, `N failed`). Log sem esse
+  resumo costuma ser ausência do **job**, não do resumo: em 17/09/2026 o `superadmin` tinha 156 de 156
+  specs verdes na máquina da sessão e nenhum job de Playwright no CI. Medição que não está no log de
+  ninguém não é verde — antes de acusar o placar, procure o job;
 - **órfãos:** `docs/ORFAOS.md` cita o caminho de cada aviso `sem-orfao` do baseline, com a resposta da
   frente dona (em uso por quem, ou decisão do dono sobre o destino). Órfão sem linha ali fica `leitura`;
 - **tenant (só multi-tenant):** o gate de tenant roda no CI e imprime
@@ -811,6 +936,14 @@ todo spec conta só o escopo que a tela mostra (o tenant da sessão), nunca o ba
 `fiscal` em 17/09/2026: dado de teste criado localmente durante o E2E do deploy mudou uma contagem
 global, tirou quatro testes do `skip` e reprovou o deploy de `a8924df`.
 
+**E2E não escreve em dado real do dono.** O spec cria o próprio escopo efêmero (tenant ou membro
+`e2e-<id>`), usa só ele e o apaga no fim, com retentativa na limpeza porque escrita segurada chega
+depois; a limpeza que esgota as tentativas **falha o teste** e lista o que sobrou, por tabela, tratando
+consulta que falhou como sobra. **Restaurar depois do teste não é proteção.** Medido no `fiscal` em
+17/09/2026: a planilha do dono foi corrompida três vezes no mesmo dia, e na terceira o defeito foi no
+próprio passo de restauração. O `md5` do dado do dono antes e depois vale como conferência, nunca como
+proteção.
+
 **Troca entre sessões.** Todo erro medido vai para o `docs/NUNCA-FAZER.md` do repositório **e** é
 enviado às outras sessões, com o que aconteceu, onde, a prova e a correção. Toda boa prática vira PR
 no `superadmin` (§14). Recado sem prova não é recado: é opinião.
@@ -864,6 +997,17 @@ As duas coisas só existem medidas.
 8. **`docs/ORFAOS.md`, `docs/SANEAMENTO.md` e `docs/OTIMIZACAO.md` são registros só-acréscimo**, como o
    `NUNCA-FAZER`: a propagação cria o esqueleto, e cada frente acrescenta a sua linha sem transferência
    de claim.
+9. **O registro é para dívida HERDADA.** Candidato criado pelo próprio PR — a fachada que exporta o que
+   ninguém importa — se enxuga ali mesmo, não se declara. Declarar dívida recém-criada é fazer o gate
+   assinar o que ele acabou de acusar (`rotas` #331, 17/09/2026).
+10. **Registro gerado no runner é publicado como artefato, e a falta dele reprova.** O
+    `actions/upload-artifact@v4` ignora arquivo oculto: `.codigo-morto-registro.json` saía verde sem
+    artefato nenhum (`rotas` #325, 17/09/2026). O passo declara `include-hidden-files: true` e
+    `if-no-files-found: error`.
+11. **O gate lê as duas grafias da claim e nunca converte "não medido" em zero.** Os manifestos do
+    ecossistema trazem `frente`/`caminhos` e também `agent`/`paths`; e quando `~/projects` não existe —
+    no runner, por exemplo — o grep no ecossistema vale `null`, nunca `0`. Prova 3 ausente é prova não
+    medida, e não prova cumprida (`rotas` #324, 17/09/2026).
 
 ### 17.2 Otimização
 
