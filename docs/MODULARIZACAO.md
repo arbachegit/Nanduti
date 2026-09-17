@@ -1,9 +1,30 @@
 # Modularização — guideline canônico IconsAI
 
-**Versão:** 1.0.4 · **Data:** 16/09/2026 · **Status:** canônico e obrigatório
+**Versão:** 1.1.1 · **Data:** 17/09/2026 · **Status:** canônico e obrigatório
 **Vale para:** todo repositório do ecossistema, sem exceção. Canônico e obrigatório.
-**Fonte única:** `iconsaiConfig/canon/MODULARIZACAO.md`. A cópia em `docs/MODULARIZACAO.md` de cada
-repositório é byte a byte igual à fonte; cópia editada à mão é divergência e reprova.
+**Modelo:** monólito modular (§0).
+**Fonte única:** `superadmin/docs/MODULARIZACAO.md`, na `main` publicada do repositório `superadmin`.
+Toda mudança nasce lá, por PR, e só depois é propagada. `iconsaiConfig/canon/MODULARIZACAO.md` e o
+`docs/MODULARIZACAO.md` de cada repositório são cópias byte a byte da fonte; cópia editada à mão é
+divergência e reprova.
+**Implementação de referência:** o `superadmin` (§14). Onde este documento e o `superadmin`
+divergirem, o documento vale e a divergência é defeito a corrigir no `superadmin` primeiro.
+
+**1.1.1:** o contrato que o placar lê fica completo (§15): o registro das respostas a cada órfão em
+`docs/ORFAOS.md`, a linha de RLS do gate de tenant, os cinco estados de um item e a prova do vermelho
+do próprio placar. Escrito ao rodar o placar pela primeira vez contra `superadmin`, `rotas` e
+`fiscal`: sem esses contratos, dois itens só podiam sair `nao_medido` para sempre.
+
+**1.1.0:** ordem do dono, 17/09/2026: «Vamos usar o monólito modular.» · «Considerando que o
+superadmin está no caminho correto, vamos primeiro atualizar a documentação em .md, colocar como
+obrigatório em todos os projetos, sendo a raiz de mudança o do superadmin.» · «mantendo o superadmin
+como best practices». O modelo passa a ter nome (§0). A fonte passa a ser o `superadmin` (cabeçalho,
+§13). Entram as regras que a avaliação de 17/09/2026 mediu faltando no `superadmin`, no `rotas` e no
+`fiscal`: o gate só vale ligado no CI (§5, item 10); o cliente do banco é cobrado no repositório
+inteiro e por todo caminho que o entrega (§5, itens 11 e 12); cada tabela tem um módulo dono (§5.1);
+tenant não é módulo (§5.2); componente de cliente não importa a fachada (§3). Entram também a
+implementação de referência (§14), a definição mensurável de pronto (§15) e o modo de trabalho entre
+sessões (§16). A prova do vermelho passa de cinco para oito sabotagens (§9).
 
 **1.0.4:** o escopo do canon passa a ser declarado — os aplicativos de `APP/`, `STANDALONE/`,
 `SHOWCASE/` e `AITUTOR/`, 61 repositórios, com os 10 de fora em `EXCLUSOES` e motivo escrito
@@ -30,6 +51,37 @@ atravessa a fronteira.**
 
 Cada regra tem fonte de mercado, listada no fim. O que é regra da casa está numa seção separada e com
 esse rótulo.
+
+---
+
+## 0. O modelo: monólito modular
+
+**Um aplicativo, um deploy, dividido por dentro em módulos de negócio com fronteira cobrada por
+ferramenta.** É o _modular monolith_ de Simon Brown, Kamil Grzybek, Shopify (Packwerk) e Spring
+Modulith. Decisão do dono em 17/09/2026, depois de comparar com camadas, vertical slice, hexagonal,
+clean architecture, DDD, microsserviços, Feature-Sliced Design e multi-tenancy.
+
+O monólito modular deste documento combina quatro ideias de mercado, cada uma com um papel:
+
+| ideia de mercado                    | o que ela decide aqui                                      | onde está  |
+| ----------------------------------- | ---------------------------------------------------------- | ---------- |
+| Bounded Context (DDD)               | **onde** corta: um módulo por domínio de negócio           | §1, §2, §4 |
+| Ports & Adapters (leve)             | **dentro** do módulo: regra pura separada de banco e rede  | §2, §3     |
+| Modular monolith: dono dos dados    | **quem** lê e escreve cada tabela                          | §5.1       |
+| Fronteira verificada por ferramenta | **quem cobra**: um gate no CI, não a disciplina de ninguém | §5, §9     |
+
+**Por que não os outros:**
+
+| modelo                      | por que não é o modelo do ecossistema                                                                                                                                                          |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| camadas (package by layer)  | espalha uma funcionalidade por várias pastas e não tem fronteira entre domínios                                                                                                                |
+| microsserviços              | um deploy por serviço, rede entre módulos e um banco por serviço: custo operacional que nenhum aplicativo daqui precisa hoje. Módulo bem isolado pode virar serviço depois, e esse é o caminho |
+| Clean Architecture completa | camadas e mapeamentos demais para CRUD; a regra de dependência dela já está na §5 (`porta-nao-conhece-adaptador`)                                                                              |
+| Feature-Sliced Design       | é só de front-end; a regra de camada dela não cobre API, banco nem Python                                                                                                                      |
+| multi-tenancy               | não é modelo de modularização: é outro eixo, e a §5.2 diz como ele convive com os módulos                                                                                                      |
+
+**O que o monólito modular NÃO promete:** escala independente por módulo e deploy de um módulo só.
+Os dois continuam sendo do aplicativo inteiro.
 
 ---
 
@@ -77,6 +129,12 @@ modules/
 shared/                       sem domínio: cliente do banco, formatação, UI genérica
 script/                       scripts de execução (seção 6)
 ```
+
+**Componente de cliente não importa a fachada.** No Next.js, `index.ts` reexporta o `leitura.ts`, e
+o `leitura.ts` puxa o cliente do banco e `server-only`. Um arquivo com `"use client"` que importa a
+fachada arrasta o servidor para o navegador e o build quebra (ou pior: vaza o que não devia). Por
+isso a tela do domínio mora em `modules/<domain>/ui/` e importa `../contrato`, nunca `..` nem
+`../index`. Medido no `superadmin` em 16/09/2026, na criação de `modules/conversation` (PR #184).
 
 ### Python
 
@@ -162,8 +220,13 @@ registra 20 arquivos de produto apagados por serem "órfãos", e eram trabalho p
 | `compartilhado-nao-conhece-modulo`   | `forbidden`: de `^shared/` para `^modules?/`                 | contrato `forbidden`                   |
 | `sem-orfao`                          | `from: { orphan: true }`, severidade `warn`                  | **não há equivalente** — medir à parte |
 
-A config de referência em TypeScript é a do `rotas` (`.dependency-cruiser.cjs`, PR #274), a primeira do
-ecossistema. Três detalhes:
+A config de referência em TypeScript é a do `superadmin` (`.dependency-cruiser.cjs`, PRs #176, #179 e
+#183), com o gate `scripts/harness/fronteira_modulos.py`. A primeira do ecossistema foi a do `rotas`
+(PR #274); a do `superadmin` passou a ser a referência em 17/09/2026 porque a do `rotas`, medida em
+`origin/main` `e1471016`, ainda tem dois buracos que o `superadmin` fechou (itens 11 e 13: o alvo do
+banco é só o pacote, embora `lib/rotas-db.ts` entregue um cliente, e qualquer
+`modules/<x>/<y>/index.ts` é aceito como fachada) e não tem a regra `compartilhado-nao-conhece-modulo`.
+Os detalhes:
 
 1. **`"^$1/"` é a peça central.** É a referência à captura do `from.path` — "o próprio módulo, seja
    ele qual for". Sem ela seria preciso uma regra por módulo.
@@ -198,6 +261,103 @@ ecossistema. Três detalhes:
    `modules/accident/browser.ts: sessionStorage`. É o par antes/depois, com a MESMA sabotagem, que
    prova a cobertura — o vermelho sozinho não distingue "passou a alcançar a raiz" de "escrevi uma
    sabotagem mais fácil de pegar".
+10. **Gate que não roda no CI não foi adotado.** O gate de fronteira roda no workflow de PR e no de
+    deploy, pelo script npm (ou `script/gate/`), com a ferramenta na versão fixa. Rodar à mão não
+    conta. Medido em 17/09/2026: o `rotas` tinha config, baseline e script
+    (`scripts/harness/gate-fronteira.sh`), e nenhum deles aparecia em `.github/`, `.githooks/` nem
+    `package.json` — nenhum PR era reprovado por furar a fronteira, e o relatório de adoção dizia
+    "ativo". No `superadmin`, o gate está em `gates.yml` e `deploy.yml`.
+11. **O alvo do banco é todo caminho que entrega um cliente de banco, não só o pacote.** Se o
+    repositório expõe o cliente por um arquivo próprio (`lib/superadmin/client.ts`,
+    `shared/database/client.ts`), esse arquivo entra no alvo de `so-o-adaptador-fala-com-o-banco`
+    junto com `@supabase/supabase-js`, `pg` ou `psycopg`. Medido no `superadmin` em 16/09/2026 (PR
+    #183): com só o pacote no alvo, um `contrato.ts` importando `superAdminDb` saiu exit 0. A
+    sabotagem nº 4 da §9 importava o pacote direto, e por isso não pegou.
+12. **No fim da adoção, `so-o-adaptador-fala-com-o-banco` vale no repositório inteiro.** Durante a
+    migração ela cobra dentro das raízes de módulo, e o que está fora vai para o baseline. Na
+    definição de pronto (§15) ela cobra de todo arquivo: rota, página, script e `shared/` inclusive
+    (este último só pode importar o cliente para entregá-lo aos adaptadores). Rota que consulta o
+    banco direto é regra de negócio fora de módulo.
+13. **Grupo é declarado por nome.** `modules/<grupo>/<dominio>/` só é aceito para grupo listado na
+    config (`GRUPOS`). Aceitar qualquer `modules/<x>/<y>/index.ts` "para permitir grupos" transforma
+    toda pasta interna com `index.ts` em fachada. Medido no `superadmin` em 16/09/2026 (PR #183): uma
+    rota importando `modules/x/interno/index.ts` saiu exit 0.
+
+### 5.1 Cada tabela tem um módulo dono
+
+Regra de mercado do monólito modular: **cada módulo só acessa as próprias tabelas; outro módulo que
+precisa do dado pede à fachada do dono**. Sem ela, a fronteira de import vale e a de dados não: dois
+módulos que fazem `SELECT` na mesma tabela estão acoplados pelo banco, e o gate de imports sai verde.
+
+| regra                   | em português claro                                                                    | severidade |
+| ----------------------- | ------------------------------------------------------------------------------------- | ---------- |
+| `dono-dos-dados`        | uma tabela (ou função RPC) só é lida e escrita pelo adaptador do módulo que a declara | erro       |
+| `tabela-sem-dono`       | tabela citada no código sem nenhum módulo que a declare                               | erro       |
+| `tabela-com-dois-donos` | a mesma tabela declarada por dois módulos                                             | erro       |
+
+**Como se declara.** No `contrato` do módulo, uma constante com os nomes exatos, com schema quando não
+for `public`:
+
+```ts
+// modules/conversation/contrato.ts
+export const TABELAS = ["conversations", "conversation_blobs"] as const;
+```
+
+```python
+# <package>/modules/conversation/contrato.py
+TABELAS: tuple[str, ...] = ("conversations", "conversation_blobs")
+```
+
+**Como se cobra.** Não é import, então não é `dependency-cruiser`: é um gate próprio
+(`gate:dono-dos-dados`), que lê as declarações e varre o código atrás de acesso a tabela
+(`.from("<t>")`, `.rpc("<f>")` e SQL literal com `from`, `join`, `into` e `update`). O acesso vale só
+dentro de um adaptador do módulo dono. Ficam fora da varredura só o que cria as tabelas:
+`supabase/migrations/` e os arquivos de seed.
+
+**Join entre tabelas de módulos diferentes** também é acesso ao dado de outro módulo. O caminho é pedir
+à fachada do dono. Se o custo disso for inaceitável, a view (ou função) que faz o join pertence a um
+dos dois módulos e é declarada nele: a decisão fica escrita, e não espalhada.
+
+**Schema não é dono.** O schema (`raw`, `staging`, `analytics`, `public`) diz a camada do dado. O
+módulo dono diz quem o lê e o escreve. Um não substitui o outro.
+
+**O que este gate reconhecidamente NÃO mede:** nome de tabela montado em tempo de execução
+(`from(variavel)`), acesso por ORM que não escreve o nome da tabela no código, e o que roda direto no
+banco (trigger, cron do Postgres).
+
+### 5.2 Tenant não é módulo
+
+Módulo é **domínio de negócio**. Tenant é **cliente** do aplicativo. São dois eixos independentes:
+Azure e AWS tratam tenancy como decisão de isolamento (silo, pool, bridge), não como forma de dividir
+o código. Um `modules/<cliente>/` mistura os dois eixos e tem três efeitos medidos no desenho de
+17/09/2026 para o `fiscal`: o código geral passa a morar dentro do nome de um cliente, o segundo
+cliente passa a depender do primeiro, e o terceiro cliente repete tudo.
+
+| regra                          | em português claro                                                                                        | severidade |
+| ------------------------------ | --------------------------------------------------------------------------------------------------------- | ---------- |
+| `tenant-nao-e-modulo`          | nenhuma pasta em `modules/` tem o nome de um tenant declarado                                             | erro       |
+| `tenant-resolvido-uma-vez`     | o tenant é resolvido num só lugar, `shared/tenant/`, a partir do host ou do caminho; ninguém mais o deduz | erro       |
+| `tenant-literal-fora-do-lugar` | o identificador de um tenant (`'iconsai'`, `'labtech'`) só aparece em `shared/tenant/` e em `variants/`   | erro       |
+
+**A forma, num aplicativo multi-tenant:**
+
+```
+shared/tenant/
+  contrato.ts          TENANTS declarados, tipo Tenant, regra host → tenant (pura)
+  index.ts             resolverTenant(request): a única função que decide
+modules/<domain>/
+  index.ts             recebe o tenant como argumento
+  variants/<tenant>.ts o que muda para um tenant, e só isso
+```
+
+- **Isolamento de dados no modelo pool:** mesmo banco, `tenant_id` em toda tabela com dado de cliente e
+  RLS filtrando por ele. O filtro na aplicação não substitui a RLS: é a RLS que segura o vazamento
+  quando a aplicação erra.
+- **O que é específico de um tenant** mora em `modules/<domain>/variants/<tenant>.ts`, escolhido pela
+  fachada do domínio. `if (tenant === "labtech")` espalhado pelo código é o que a regra
+  `tenant-literal-fora-do-lugar` reprova.
+- **Aplicativo que não é multi-tenant** não declara `TENANTS` e não tem `shared/tenant/`. As três regras
+  ficam fora do relatório com esse motivo escrito.
 
 ---
 
@@ -300,16 +460,25 @@ para a forma antiga) em **aviso** durante a transição. Ela sai quando a forma 
 
 ## 9. Prova do vermelho — obrigatória
 
-Um gate só vale depois de provado que ele reprova. Três sabotagens, numa base que você **acabou de ver
+Um gate só vale depois de provado que ele reprova. Oito sabotagens, numa base que você **acabou de ver
 limpa**, e cada uma tem de reprovar **pela regra certa** — conferir só o exit code não basta:
 
-| #   | sabotagem                                                           | tem de reprovar por                           |
-| --- | ------------------------------------------------------------------- | --------------------------------------------- |
-| 1   | `contrato` importa `leitura` do mesmo módulo                        | `porta-nao-conhece-adaptador` (e `sem-ciclo`) |
-| 2   | um módulo importa um arquivo interno de outro                       | `fachada-modulo`                              |
-| 3   | uma rota em `app/api/` importa um arquivo interno de um módulo      | `fachada-de-fora`                             |
-| 4   | um arquivo de módulo que não é adaptador importa o cliente do banco | `so-o-adaptador-fala-com-o-banco`             |
-| 5   | um arquivo de `shared/` importa um módulo                           | `compartilhado-nao-conhece-modulo`            |
+| #   | sabotagem                                                                          | tem de reprovar por                             |
+| --- | ---------------------------------------------------------------------------------- | ----------------------------------------------- |
+| 1   | `contrato` importa `leitura` do mesmo módulo                                       | `porta-nao-conhece-adaptador` (e `sem-ciclo`)   |
+| 2   | um módulo importa um arquivo interno de outro                                      | `fachada-modulo`                                |
+| 3   | uma rota em `app/api/` importa um arquivo interno de um módulo                     | `fachada-de-fora`                               |
+| 4   | um arquivo de módulo que não é adaptador importa o cliente do banco                | `so-o-adaptador-fala-com-o-banco`               |
+| 5   | um arquivo de `shared/` importa um módulo                                          | `compartilhado-nao-conhece-modulo`              |
+| 6   | um `contrato` importa o cliente de banco **do próprio repositório** (não o pacote) | `so-o-adaptador-fala-com-o-banco` (§5, item 11) |
+| 7   | uma rota importa `modules/<x>/<pasta-interna>/index.ts`                            | `fachada-de-fora` (§5, item 13)                 |
+| 8   | o adaptador do módulo A consulta uma tabela declarada pelo módulo B                | `dono-dos-dados` (§5.1)                         |
+
+Aplicativo multi-tenant soma a nona: `if (tenant === "<slug>")` num arquivo de módulo fora de
+`variants/`, que tem de reprovar por `tenant-literal-fora-do-lugar` (§5.2).
+
+As sabotagens 6 e 7 são as que o `superadmin` achou buracos reais em 16/09/2026. A 8 existe porque a
+fronteira de import sai verde com dois módulos lendo a mesma tabela.
 
 A terceira é a que pegou o buraco no `rotas`: a primeira regra só olhava imports nascidos dentro da
 raiz de módulos, e 53 violações vindas de `app/api/` estavam invisíveis.
@@ -366,13 +535,32 @@ Este guideline **não impõe** nenhuma das três. Em 15/09/2026, os repositório
 | nomes distintos de pasta em português               | ao menos 74 (heurística; o número real é maior)                                                                                                                          |
 | repositórios com ferramenta de fronteira            | `rotas` (PR #274) e `superadmin` (piloto, PR #176)                                                                                                                       |
 
+**Medido em 17/09/2026**, em `origin/main`, na avaliação que levou à 1.1.0:
+
+| medida                          | `superadmin` (`2785ab1`)        | `rotas` (`e1471016`)                                      | `fiscal` (`9a2998d`)            |
+| ------------------------------- | ------------------------------- | --------------------------------------------------------- | ------------------------------- |
+| arquivos `.ts`/`.tsx` em módulo | 16 de 337 (~5%)                 | 117 de 655 (~18%)                                         | 3 de 294 (~1%)                  |
+| raízes de módulo                | 2 (`modules/`, `lib/modulos/`)  | 2, com três formas diferentes                             | 1 (`apps/api/modules/invoices`) |
+| gate de fronteira no CI         | sim (`gates.yml`, `deploy.yml`) | **não** (só à mão)                                        | não existe                      |
+| violações no baseline           | 2 avisos                        | 69 (53 `fachada-de-fora`, 13 órfãos, 2 de banco, 1 ciclo) | não medido                      |
+| arquivos com mais de 400 linhas | 22 de 338                       | 36 de 734                                                 | 23 de 294 (um de 4.268)         |
+| guideline na `main`             | 1.0.4                           | versão anterior (divergente)                              | ausente (PR #13 aberto)         |
+
+Guideline 1.0.4 no ecossistema, na mesma data: **7 de 61** repositórios iguais à fonte (18 divergentes, 36
+ausentes), medido por `canon/verificar_modularizacao.py`.
+
 ---
 
 ## 13. Como se prova que este documento está em 100% dos projetos
 
-- Fonte única em `iconsaiConfig/canon/MODULARIZACAO.md`.
+- Fonte única em `superadmin/docs/MODULARIZACAO.md`, lida da `main` publicada — nunca do disco.
+- `iconsaiConfig/canon/MODULARIZACAO.md` é espelho da fonte, com o mesmo sha256. É dele que os scripts
+  de propagação copiam, e o verificador reprova quando o espelho diverge da fonte.
 - Cada repositório tem `docs/MODULARIZACAO.md` **com o mesmo sha256** da fonte, e uma linha no
   `CLAUDE.md`/`AGENTS.md` apontando para ele.
+- **Mudança no guideline:** PR no `superadmin` → merge com CI verde → espelho no `iconsaiConfig` →
+  `canon/atualizar_modularizacao.py` abre um PR por repositório → `canon/mergear_se_verde.py` faz o
+  merge só com o CI verde, job a job. Editar o espelho ou uma cópia antes da fonte é divergência.
 - `iconsaiConfig/canon/verificar_modularizacao.py` mede todos os repositórios e classifica cada um como
   `igual`, `divergente`, `ausente` ou `nao_medido`. **100% só é declarado quando todos são `igual`.**
   `nao_medido` não conta como cumprido, e worktree não conta como repositório.
@@ -384,6 +572,129 @@ Este guideline **não impõe** nenhuma das três. Em 15/09/2026, os repositório
 
 ---
 
+## 14. A implementação de referência: o `superadmin`
+
+Ordem do dono, 17/09/2026: o `superadmin` é a _best practice_ do ecossistema. Na prática:
+
+| o que copiar                              | de onde, no `superadmin`                                             |
+| ----------------------------------------- | -------------------------------------------------------------------- |
+| a forma de um módulo                      | `modules/conversation/` (fachada, porta, adaptador, `ui/`)           |
+| a config de fronteira                     | `.dependency-cruiser.cjs`, com `GRUPOS` declarados                   |
+| o gate, o baseline e o autoteste          | `scripts/harness/fronteira_modulos.py` (`--baseline`, `--autoteste`) |
+| o gate no CI                              | `.github/workflows/gates.yml` e `deploy.yml`                         |
+| os gates que varrem pastas com `modules/` | `scripts/check-service-role.sh` e `.eslintrc.json` (PR #183)         |
+
+- **Toda regra nova entra primeiro no `superadmin`**, com a prova do vermelho, e só depois é copiada.
+  Os gates `dono-dos-dados` (§5.1) e, para aplicativo multi-tenant, `tenant-*` (§5.2) nascem lá.
+- **Repositório que achar um jeito melhor não diverge.** Abre PR no `superadmin` (código) ou na fonte
+  deste documento (regra). Quando o PR entra, os outros copiam.
+- **Cópia cita a origem:** o arquivo copiado diz de qual commit do `superadmin` veio, para que a
+  divergência posterior seja medível.
+
+---
+
+## 15. Definição de pronto: quando um repositório está 100% modularizado
+
+Um repositório só é declarado **100% modularizado** quando **todos** os itens abaixo são medidos na
+`main` publicada e passam. Item não medido é cinza, e cinza não é verde. Não existe "pronto com
+ressalva".
+
+| #   | item                        | 100% é                                                                                                                                                                                                                                                   |
+| --- | --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | guideline                   | `docs/MODULARIZACAO.md` com o sha256 da fonte, e ponteiro no `CLAUDE.md` e no `AGENTS.md`                                                                                                                                                                |
+| 2   | código de negócio em módulo | nenhum arquivo de código em `lib/`, `components/`, `lib/modulos/` ou em qualquer pasta fora de `app/`, `modules/`, `shared/`, `script/`, testes, `supabase/` e config de raiz. Pacote Python segue a forma do §3 (`entrypoints/`, `modules/`, `shared/`) |
+| 3   | forma                       | todo módulo tem `index` e `contrato`; todo módulo que faz I/O tem o adaptador; nenhuma forma antiga (`dados.ts`, `servidor.ts`) nem nome fora do §3                                                                                                      |
+| 4   | uma raiz                    | só `modules/`; a config não tem mais `lib/modulos` nem a regra `fachada-modulo-legado`                                                                                                                                                                   |
+| 5   | fronteira no CI             | gate **e autoteste** no workflow de PR e no de deploy, ferramenta em versão fixa; o autoteste com as oito sabotagens do §9 + o caso legítimo + o caso que prova que o gate roda                                                                          |
+| 6   | baseline                    | zero violações de severidade erro. Os avisos `sem-orfao` restantes têm, cada um, a resposta da frente dona registrada                                                                                                                                    |
+| 7   | banco                       | `so-o-adaptador-fala-com-o-banco` vale no repositório inteiro (§5, item 12), com o alvo completo (§5, item 11). É o **último** passo da adoção, como a raiz única (§8, passo 7): durante a migração a regra cobra só nas raízes de módulo                |
+| 8   | dono dos dados              | gate `dono-dos-dados` no CI, com zero violações e 100% das tabelas citadas no código com dono (§5.1)                                                                                                                                                     |
+| 9   | tenant                      | se multi-tenant: as três regras da §5.2 com zero violações, e RLS ativa em 100% das tabelas com `tenant_id`, medida no banco (`pg_policies`)                                                                                                             |
+| 10  | gates que varrem pastas     | todos incluem `modules/` e `shared/`, cada um provado com a mesma sabotagem antes e depois (§5, item 9)                                                                                                                                                  |
+| 11  | nomes                       | pastas internas em inglês (§4) e scripts em `script/<grupo>/` com cabeçalho e referência (§6)                                                                                                                                                            |
+| 12  | regras da casa              | em repositório com `modular.json`: `python3 ~/.claude/skills/modular/scripts/harness.py --repo <raiz>` sai 0                                                                                                                                             |
+| 13  | verde                       | typecheck, lint, testes, build e a suíte E2E do repositório com zero falhas e **zero skips**; CI do PR com todos os jobs `pass`; deploy `success`; produção servindo o SHA do `HEAD`                                                                     |
+
+**Quem mede:** `iconsaiConfig/canon/placar_modularizacao.py --repo <raiz>`, lendo `origin/main` e o CI
+pelo `gh`, com um veredito por item. Exit `0` só com os 13 itens verdes · `1` algum vermelho · `2` não
+pôde medir. A sessão que implementa não declara o próprio pronto: quem declara é o placar, rodado
+pelo coordenador (§16). O placar tem a sua prova do vermelho em
+`iconsaiConfig/canon/test_placar_modularizacao.py`: uma sabotagem por item estático e uma base limpa
+que tem de continuar verde.
+
+Cada item sai com um de cinco estados. Só os dois primeiros contam como cumpridos:
+
+| estado          | quando                                                                     |
+| --------------- | -------------------------------------------------------------------------- |
+| `verde`         | medido e cumprido                                                          |
+| `nao_se_aplica` | declarado fora do item, com motivo escrito (ex.: repositório sem tenant)   |
+| `vermelho`      | medido e não cumprido, com a lista do que falta                            |
+| `leitura`       | depende de leitura humana que ainda não foi registrada no repositório      |
+| `nao_medido`    | o placar não pôde medir (CI sem log, `gh` sem acesso, produção fora do ar) |
+
+**O contrato que o placar lê**, igual em todo repositório:
+
+- **autoteste no log do CI:** uma linha por caso, começando por `PASS` ou `FAIL`, com o nome da regra
+  na linha da sabotagem (`PASS  sabotagem reprova por fachada-de-fora (exit=1)`), mais a linha do caso
+  legítimo (`caminho legítimo`) e a do caso que prova que o gate roda (`config inválida`). É o formato
+  de `scripts/harness/fronteira_modulos.py` do `superadmin`;
+- **produção:** `https://<domínio>/build-info.txt` começa pelo SHA do commit publicado;
+- **E2E:** o resumo do Playwright no log do CI (`N passed`, `N skipped`, `N failed`);
+- **órfãos:** `docs/ORFAOS.md` cita o caminho de cada aviso `sem-orfao` do baseline, com a resposta da
+  frente dona (em uso por quem, ou decisão do dono sobre o destino). Órfão sem linha ali fica `leitura`;
+- **tenant (só multi-tenant):** o gate de tenant roda no CI e imprime
+  `PASS  rls em N de N tabelas com tenant_id`, medido no banco por `pg_policies`.
+
+O que o placar reconhecidamente NÃO mede: a verdade do conteúdo, os itens que dependem de leitura
+humana (a resposta da frente dona a cada órfão, o nome em inglês fora da heurística) e o que só existe
+em produção fora do `build-info.txt`. Esses itens saem no relatório como `leitura`, com a lista do que
+ler — e só ficam verdes com o registro dessa leitura no repositório.
+
+---
+
+## 16. Como as sessões trabalham juntas
+
+**Papéis.** Uma sessão por repositório é a dona da frente de modularização dele e é a única que edita
+o código. Uma sessão **coordenadora** roda o placar em laço, cobra o que falta de cada uma e
+redistribui o que uma aprendeu para as outras. A coordenadora não edita o repositório das outras.
+
+**A cada módulo migrado, a sessão dona:**
+
+1. registra a claim em `.agent-claims.json` **antes** da primeira edição, com os caminhos;
+2. mede o grafo antes de escolher o módulo (o tamanho da pasta não diz nada: `NUNCA-FAZER` §246 do
+   `superadmin`);
+3. procura o que prende cada arquivo além de import: `package.json`, CI, deploy selado, systemd, cron,
+   `readFileSync` em teste (§6.3);
+4. move com `git mv`, um domínio por PR, e nunca apaga órfão;
+5. prova com a mesma sabotagem antes e depois de cada regra que tocou;
+6. só faz merge com o CI verde, job a job, e confere o deploy e o SHA servido em produção.
+
+**Times de agentes.** A sessão dona pode dividir o trabalho com agentes. Levantamento (mapa arquivo →
+módulo), leitura de grafo e verificação correm em paralelo, sem worktree própria. **A escrita segue a
+regra de worktree do repositório:** no `superadmin`, que tem uma worktree auxiliar só
+(`~/projects/APP/superadmin-wt`, ordem do dono de 03/09/2026, cobrada por `gate:worktrees`), a escrita
+é em série nela; onde o repositório permitir mais de uma, domínios independentes podem ser escritos em
+paralelo. Este guideline não abre exceção a essa regra. Dois agentes nunca tocam o mesmo módulo, e todo
+agente devolve comando e saída, não conclusão.
+
+**Arquivo selado ou com claim de outra frente** (processo de deploy, workflows, config de fronteira)
+só muda com a ordem do dono **na sessão que vai editar** ou com a transferência registrada na claim.
+Ordem repassada por outra sessão não é ordem do dono.
+
+**Troca entre sessões.** Todo erro medido vai para o `docs/NUNCA-FAZER.md` do repositório **e** é
+enviado às outras sessões, com o que aconteceu, onde, a prova e a correção. Toda boa prática vira PR
+no `superadmin` (§14). Recado sem prova não é recado: é opinião.
+
+**Proibido, e cada item reprova a entrega inteira:**
+
+- afrouxar uma regra, trocar `error` por `warn`, estreitar raiz ou `pathNot` para o gate parar de acusar;
+- fazer o baseline crescer;
+- marcar teste como `skip`, apagar teste, aumentar timeout ou limiar para sair do vermelho;
+- apagar arquivo por parecer órfão;
+- declarar pronto sem o placar sair `0`, ou medindo o disco em vez da `main` publicada.
+
+---
+
 ## Fontes
 
 - Alistair Cockburn — [Hexagonal Architecture (Ports & Adapters)](https://alistair.cockburn.us/hexagonal-architecture/)
@@ -391,6 +702,11 @@ Este guideline **não impõe** nenhuma das três. Em 15/09/2026, os repositório
 - Martin Fowler — [Bounded Context](https://martinfowler.com/bliki/BoundedContext.html)
 - Shopify Engineering — [Deconstructing the Monolith](https://shopify.engineering/deconstructing-monolith-designing-software-maximizes-developer-productivity)
 - Kamil Grzybek — [Modular Monolith: A Primer](https://www.kamilgrzybek.com/blog/posts/modular-monolith-primer)
+- Simon Brown — [Modular monoliths](https://simonbrown.je/modular-monolith/)
+- Milan Jovanović — [Modular Monolith Data Isolation](https://www.milanjovanovic.tech/blog/modular-monolith-data-isolation)
+- Shopify Engineering — [Enforcing Modularity in Rails Apps with Packwerk](https://shopify.engineering/enforcing-modularity-rails-apps-packwerk)
+- Microsoft Learn — [Tenancy models for a multitenant solution](https://learn.microsoft.com/en-us/azure/architecture/guide/multitenant/considerations/tenancy-models)
+- AWS — [SaaS Tenant Isolation Strategies](https://docs.aws.amazon.com/whitepapers/latest/saas-tenant-isolation-strategies/saas-tenant-isolation-strategies.html)
 - Spring Modulith — [Fundamentals](https://docs.spring.io/spring-modulith/reference/fundamentals.html)
 - Jimmy Bogard — [Vertical Slice Architecture](https://www.jimmybogard.com/vertical-slice-architecture/)
 - Percival & Gregory — [Architecture Patterns with Python, cap. 4](https://github.com/cosmicpython/book/blob/master/chapter_04_service_layer.asciidoc)
