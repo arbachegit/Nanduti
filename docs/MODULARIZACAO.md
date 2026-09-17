@@ -1,6 +1,6 @@
 # Modularização — guideline canônico IconsAI
 
-**Versão:** 1.1.1 · **Data:** 17/09/2026 · **Status:** canônico e obrigatório
+**Versão:** 1.1.2 · **Data:** 17/09/2026 · **Status:** canônico e obrigatório
 **Vale para:** todo repositório do ecossistema, sem exceção. Canônico e obrigatório.
 **Modelo:** monólito modular (§0).
 **Fonte única:** `superadmin/docs/MODULARIZACAO.md`, na `main` publicada do repositório `superadmin`.
@@ -9,6 +9,11 @@ Toda mudança nasce lá, por PR, e só depois é propagada. `iconsaiConfig/canon
 divergência e reprova.
 **Implementação de referência:** o `superadmin` (§14). Onde este documento e o `superadmin`
 divergirem, o documento vale e a divergência é defeito a corrigir no `superadmin` primeiro.
+
+**1.1.2:** a cópia fica fora do formatador do repositório (§13). Medido na propagação da 1.1.1:
+o `format:check` do `Stats` reprovou a cópia porque o Prettier de lá reformata o bloco de código
+(`singleQuote`); das sete configurações de Prettier testadas contra a fonte, seis a reformatam
+(`singleQuote`, `semi`, `tabWidth`, `proseWrap`). Não existe formatação única que passe em todas.
 
 **1.1.1:** o contrato que o placar lê fica completo (§15): o registro das respostas a cada órfão em
 `docs/ORFAOS.md`, a linha de RLS do gate de tenant, os cinco estados de um item e a prova do vermelho
@@ -558,6 +563,10 @@ ausentes), medido por `canon/verificar_modularizacao.py`.
   de propagação copiam, e o verificador reprova quando o espelho diverge da fonte.
 - Cada repositório tem `docs/MODULARIZACAO.md` **com o mesmo sha256** da fonte, e uma linha no
   `CLAUDE.md`/`AGENTS.md` apontando para ele.
+- **A cópia fica fora do formatador do repositório.** Onde houver Prettier, `docs/MODULARIZACAO.md`
+  entra no `.prettierignore`; onde houver markdownlint, no `.markdownlintignore`. Formatar a cópia a
+  torna divergente da fonte, e reformatar a fonte para o gosto de um repositório reprova em outro. A
+  exclusão vale só para este arquivo, e o script de propagação a escreve junto com a cópia.
 - **Mudança no guideline:** PR no `superadmin` → merge com CI verde → espelho no `iconsaiConfig` →
   `canon/atualizar_modularizacao.py` abre um PR por repositório → `canon/mergear_se_verde.py` faz o
   merge só com o CI verde, job a job. Editar o espelho ou uma cópia antes da fonte é divergência.
