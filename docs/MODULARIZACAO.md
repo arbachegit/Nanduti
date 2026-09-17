@@ -1,6 +1,6 @@
 # Modularização — guideline canônico IconsAI
 
-**Versão:** 1.1.3 · **Data:** 17/09/2026 · **Status:** canônico e obrigatório
+**Versão:** 1.1.4 · **Data:** 17/09/2026 · **Status:** canônico e obrigatório
 **Vale para:** todo repositório do ecossistema, sem exceção. Canônico e obrigatório.
 **Modelo:** monólito modular (§0).
 **Fonte única:** `superadmin/docs/MODULARIZACAO.md`, na `main` publicada do repositório `superadmin`.
@@ -9,6 +9,19 @@ Toda mudança nasce lá, por PR, e só depois é propagada. `iconsaiConfig/canon
 divergência e reprova.
 **Implementação de referência:** o `superadmin` (§14). Onde este documento e o `superadmin`
 divergirem, o documento vale e a divergência é defeito a corrigir no `superadmin` primeiro.
+
+**1.1.4:** as lições medidas no primeiro dia do programa, nas sessões `superadmin-7a`, `rotas-06`,
+`fiscal-ee`, `app-87` e `app-e2`, com prova de cada uma. A §3 ganha a forma do módulo sem banco, a
+tela de cliente usada por muitas páginas (contexto) e a página de cliente dividida. A §5 ganha os itens
+15 a 21: gate que depende de nome de arquivo, comentário lido como código, baseline que pareia
+movimentos, gate que lê constante, leitura paginada, conflito em manifesto de escopo e prévia antes de
+efeito irreversível. A §5.1 cobre helper com tabela por parâmetro, tabela de mesmo nome em bancos
+diferentes e a fachada seguida pelo orçamento. A §5.2 exige escopo de tenant por ramo de rota (leitura
+e escrita), predicado nomeado para o tenant seed e comparação com constante. A §15 fixa como o placar
+escolhe o commit, o deploy medido pelo job de publicação e o push só de documentação. A §16 proíbe E2E
+local com dado de teste durante o E2E de um deploy. A §17 passa a aceitar a remoção autorizada no
+`fiscal`, fixa ferramenta por lockfile e hash, a prova de artefato gerado, os registros só-acréscimo e
+a catraca que não trava a publicação.
 
 **1.1.3:** ordem do dono, 17/09/2026: «vamos otimizar a aplicação ao máximo e procurar dead codes -
 sanitizar» e «Toda e qualquer parada para tomar decisão, informe que a escolha será pela recomendada
@@ -149,6 +162,22 @@ o `leitura.ts` puxa o cliente do banco e `server-only`. Um arquivo com `"use cli
 fachada arrasta o servidor para o navegador e o build quebra (ou pior: vaza o que não devia). Por
 isso a tela do domínio mora em `modules/<domain>/ui/` e importa `../contrato`, nunca `..` nem
 `../index`. Medido no `superadmin` em 16/09/2026, na criação de `modules/conversation` (PR #184).
+
+**Módulo sem banco não tem `leitura.ts`.** O adaptador existe para falar com o banco; módulo com
+`TABELAS = []` (cálculo puro, catálogo estático) tem `index` e `contrato` e mais nada. Criar
+`leitura.ts` vazio para passar em um gate é proibido. **Capacidades** (`<módulo>:<verbo>`) são exigidas
+de módulo que expõe rota ou efeito — é o que a autorização checa; módulo sem rota fica isento. As duas
+decisões são de 17/09/2026 (`superadmin-7a`, placar item 12), e a skill `$modular` segue este texto.
+
+**Página de cliente que monta telas de vários domínios** divide em duas: `page.tsx` de SERVIDOR importa
+as fachadas e passa as telas como elementos (`ReactNode`) para um shell `"use client"` que guarda só o
+estado das abas. Medido no `rotas` em 17/09/2026 (`app/monitor/page.tsx`, 81353304).
+
+**Componente de cliente usado por muitas telas** (o `CrawlerPanel` do `rotas`, dentro de uma view de
+cliente usada por 27 abas) não alcança o módulo por prop. A forma é um **contexto** em `shared/ui/`,
+com o provedor em `modules/<domínio>/ui/` montado pela página de servidor; o componente de cliente lê o
+contexto e nunca importa a fachada. Medido no `rotas` em 17/09/2026 (PR #316): fronteira de 18 para 13
+violações, com duas sabotagens vermelhas.
 
 ### Python
 
@@ -301,6 +330,33 @@ Os detalhes:
     Medido no `rotas` em 17/09/2026: o baseline gravava o destino do pacote do banco como
     `../../../../../../../Users/…/node_modules/…`, e num checkout limpo o gate acusava as violações
     conhecidas como novas. Gere o baseline num checkout limpo, com `node_modules` próprio.
+15. **Gate que cita um arquivo pelo nome fica cego quando o arquivo muda de lugar.** Medido no
+    `superadmin` em 17/09/2026 (PR #192): com o cliente do banco movido para `shared/database/`, o
+    `check-service-role`, o ESLint e a fronteira saíram exit 0 com a sabotagem no lugar. Toda mudança
+    de caminho refaz a sabotagem de cada gate que cita o caminho antigo, antes do merge.
+16. **Gate de texto remove comentário e string antes de casar.** O mesmo PR acendeu falso positivo em
+    comentário (`fetch("/api/…")` citado em `base-path.ts`), e o gate de catch vazio acusou o comentário
+    que descrevia o próprio defeito (#193). Mascarar é parte do gate, com um caso no autoteste.
+17. **Baseline pareia o que mudou de lugar.** `git mv` de arquivo com violação conhecida, ou dar dono a
+    uma tabela, muda a chave da entrada. O gate pareia 1 para 1 a entrada nova com a que sumiu (mesma
+    regra e mesmo arquivo, ou mesma tabela), e o total nunca cresce. Medido no `superadmin` (#197,
+    `parear_movidas`). Vale para todo gate com baseline por caminho.
+18. **Gate que lê o texto de uma chamada precisa do literal ou resolve a constante.** Lista de colunas
+    movida para uma constante fez o orçamento perder a coluna volumosa (`superadmin` #201), e nome de
+    tabela em constante escapava do dono dos dados. O autoteste move o literal para uma constante e
+    exige o mesmo vermelho.
+19. **Leitura do PostgREST corta em 1.000 linhas, qualquer que seja o `limit`.** Pedido de 5.000
+    recebeu 1.000 e respondeu `truncado: false` (`superadmin`, histórico de auditoria, 17/09/2026). Toda
+    leitura que pode passar de 1.000 anda em páginas por `range` e declara `truncado` medindo
+    `limite + 1`; a prova usa limite acima de 1.000.
+20. **Conflito em manifesto de escopo se resolve manifesto por manifesto.** No rebase do `rotas` #316,
+    copiar a lista de um manifesto para os outros apagou caminhos únicos de outras frentes (uma
+    migration, `next.config.mjs`, um spec); foi visto no diff antes do merge. O diff do arquivo de
+    escopo só pode tirar os caminhos transferidos.
+21. **Efeito irreversível passa primeiro por uma prévia.** Canal novo que grava em log só-acréscimo,
+    evento, e-mail ou produção roda antes com o efeito trocado por um falso e o resultado lido.
+    Medido no `superadmin` em 17/09/2026: a vigia do GitHub, rodada direto contra o banco, gravou dois
+    eventos permanentes de repositórios que não são software.
 
 ### 5.1 Cada tabela tem um módulo dono
 
@@ -340,6 +396,17 @@ dos dois módulos e é declarada nele: a decisão fica escrita, e não espalhada
 **Schema não é dono.** O schema (`raw`, `staging`, `analytics`, `public`) diz a camada do dado. O
 módulo dono diz quem o lê e o escreve. Um não substitui o outro.
 
+**Função genérica que recebe a tabela por parâmetro** (`from(table)`) sai do relatório como
+`tabela-nao-resolvida`, nomeada, e não como limpa; a migração a substitui pela fachada do dono.
+
+**Tabela de mesmo nome em bancos diferentes** (`audit_logs` existe em três) não é declarada pelo nome
+solto: o gate identifica tabela só por nome, e declarar juntaria três donos num. Declare
+`<banco>.<tabela>` onde o gate suportar, ou deixe fora de `TABELAS` com o motivo escrito no contrato.
+
+**Gate que conta idas ao banco segue a fachada até o adaptador.** Trocar a leitura direta pela fachada
+do dono não pode "melhorar" o orçamento sem mudar as idas ao banco (`superadmin`, `/api/conversas`: 4
+ondas reais, contagem estática ia a 2).
+
 **O que este gate reconhecidamente NÃO mede:** nome de tabela montado em tempo de execução
 (`from(variavel)`), acesso por ORM que não escreve o nome da tabela no código, e o que roda direto no
 banco (trigger, cron do Postgres).
@@ -377,6 +444,17 @@ modules/<domain>/
   `tenant-literal-fora-do-lugar` reprova.
 - **Aplicativo que não é multi-tenant** não declara `TENANTS` e não tem `shared/tenant/`. As três regras
   ficam fora do relatório com esse motivo escrito.
+- **Todo ramo de uma rota passa pela mesma função de escopo, na leitura e na escrita.** Medido no
+  `fiscal` em 17/09/2026: `GET /api/attachments` tinha 11 leituras e só uma (`all=1`) filtrava por
+  tenant; um membro de outra empresa recebia PDFs, valores e impostos. No `PATCH`, um id de outro tenant
+  fazia o gatilho reescrever o preço do outro. RLS e `pg_policies` passavam: **gate de policy não prova o
+  ramo da rota**. A prova é E2E nos dois sentidos, com um membro forjando o cabeçalho de tenant, vermelho
+  no código antigo e verde no novo.
+- **O tenant seed é um predicado nomeado** em `shared/tenant/` (`ehTenantSeed(id)`), nunca comparação
+  espalhada: o `fiscal` tinha 9 comparações com `DEFAULT_TENANT_ID` em 4 arquivos que o grep por literal
+  não achava. Comparar ou fazer `switch` com uma constante de tenant fora de `shared/tenant/` e de
+  `variants/` reprova como `tenant-literal-fora-do-lugar`, com ou sem o literal.
+- **Teste também não escreve o tenant literal.** O spec importa a constante de `shared/tenant/`.
 
 ---
 
@@ -646,7 +724,10 @@ ressalva".
 | 15  | otimização                  | orçamento de desempenho no CI (§17) que só encolhe, com a última medida dentro dele, e `docs/OTIMIZACAO.md` com antes e depois de cada otimização                                                                                                        |
 
 **Quem mede:** `iconsaiConfig/canon/placar_modularizacao.py --repo <raiz>`, lendo `origin/main` e o CI
-pelo `gh`, com um veredito por item. Exit `0` só com os 15 itens verdes · `1` algum vermelho · `2` não
+pelo `gh`, com um veredito por item. **Os 15 itens olham o mesmo commit: o mais novo da `main` cujo CI
+terminou** (pelo menos um run, todos concluídos). Medir o `HEAD` logo depois de um merge, com o run em
+andamento, derrubava os itens de CI sem o código ter piorado, e o dono leu isso como retrocesso em
+17/09/2026. O relatório diz qual commit mediu e por que pulou os mais novos. Exit `0` só com os 15 itens verdes · `1` algum vermelho · `2` não
 pôde medir. A sessão que implementa não declara o próprio pronto: quem declara é o placar, rodado
 pelo coordenador (§16). O placar tem a sua prova do vermelho em
 `iconsaiConfig/canon/test_placar_modularizacao.py`: uma sabotagem por item estático e uma base limpa
@@ -668,7 +749,11 @@ Cada item sai com um de cinco estados. Só os dois primeiros contam como cumprid
   na linha da sabotagem (`PASS  sabotagem reprova por fachada-de-fora (exit=1)`), mais a linha do caso
   legítimo (`caminho legítimo`) e a do caso que prova que o gate roda (`config inválida`). É o formato
   de `scripts/harness/fronteira_modulos.py` do `superadmin`;
-- **produção:** `https://<domínio>/build-info.txt` começa pelo SHA do commit publicado;
+- **produção:** `https://<domínio>/build-info.txt` começa pelo SHA do commit publicado. Se produção
+  serve um ancestral e daquele commit até o medido só mudou documentação (`.md` ou `docs/`), o item não
+  reprova por isso: o guard de deploy pula push só de documentação de propósito;
+- **deploy:** vale o JOB de publicação com `success`, não o run. No pipeline canônico o `Publish` pode
+  sair `skipped` com o run `success` (commit superado, push só de documentação), e nada foi publicado;
 - **E2E:** o resumo do Playwright no log do CI (`N passed`, `N skipped`, `N failed`);
 - **órfãos:** `docs/ORFAOS.md` cita o caminho de cada aviso `sem-orfao` do baseline, com a resposta da
   frente dona (em uso por quem, ou decisão do dono sobre o destino). Órfão sem linha ali fica `leitura`;
@@ -720,6 +805,12 @@ nunca apaga o que o dono mandou preservar e nunca contorna política externa (CL
 Onde o repositório exige a ordem do dono na própria sessão (claim alheia, arquivo selado, remoção), a
 sessão pergunta nela e, enquanto espera, faz a parte que não depende da resposta.
 
+**E2E contra banco único não roda em paralelo com o E2E de um deploy.** Antes de rodar localmente
+qualquer teste que cria dado, `gh run list --status in_progress` do repositório precisa estar vazio, e
+todo spec conta só o escopo que a tela mostra (o tenant da sessão), nunca o banco inteiro. Medido no
+`fiscal` em 17/09/2026: dado de teste criado localmente durante o E2E do deploy mudou uma contagem
+global, tirou quatro testes do `skip` e reprovou o deploy de `a8924df`.
+
 **Troca entre sessões.** Todo erro medido vai para o `docs/NUNCA-FAZER.md` do repositório **e** é
 enviado às outras sessões, com o que aconteceu, onde, a prova e a correção. Toda boa prática vira PR
 no `superadmin` (§14). Recado sem prova não é recado: é opinião.
@@ -741,8 +832,12 @@ As duas coisas só existem medidas.
 
 ### 17.1 Código morto
 
-1. **A ferramenta mede, com versão fixa:** `knip` para TypeScript/JavaScript (arquivos, exports e
-   dependências sem uso) e `vulture` para Python. A saída vai para um artefato versionado.
+1. **A ferramenta mede, com versão e conteúdo fixos:** `knip` para TypeScript/JavaScript (arquivos,
+   exports e dependências sem uso), como `devDependency` exata e rodado de `node_modules/.bin`, e
+   `vulture` para Python, instalado com `pip --require-hashes`. `npx --yes <pacote>@<versão>` fixa a
+   versão, não o conteúdo: é o risco de pacote trocado (revisão da `superadmin-7a`, 17/09/2026). O
+   registro dos candidatos é versionado (`.codigo-morto-registro.json`), com as provas medidas de cada
+   um.
 2. **Um candidato só sai do repositório com as seis provas, todas registradas:**
    1. a ferramenta o acusa;
    2. `git grep` do nome e do caminho no repositório inteiro — incluindo `readFileSync`,
@@ -754,14 +849,21 @@ As duas coisas só existem medidas.
 3. **Faltou uma prova, não sai.** Vai para `docs/ORFAOS.md` com o motivo. `NUNCA-FAZER` §1: 20
    arquivos de produto apagados por parecerem órfãos eram trabalho em pausa.
 4. **A remoção exige a ordem do dono na sessão do repositório.** No `fiscal`, o dono disse em
-   17/09/2026: «não vamos apagar nada. Vamos preservar tudo da forma que está. Vamos apenas
-   modularizar e depois voltamos às funcionalidades.» Enquanto essa ordem valer, o saneamento ali é só
-   medição e registro.
+   17/09/2026 «não vamos apagar nada» e, no mesmo dia, autorizou na sessão `fiscal-ee` a remoção com as
+   seis provas, em PR próprio. A ordem mais nova vale, e só na sessão em que foi dada.
 5. **Cada remoção vai para `docs/SANEAMENTO.md`**: caminho, as seis provas e o SHA de antes (a
    recuperação é `git checkout <sha> -- <caminho>`). Remoção vai em PR próprio, separado do `git mv`
    da migração.
 6. **O gate de código morto** roda a ferramenta no CI e reprova candidato que não esteja nem removido
-   nem registrado. O `superadmin` escreve o primeiro, e os outros copiam (§14).
+   nem registrado. O `superadmin` escreveu o primeiro (`scripts/harness_codigo_morto.py`, H-MORTO-01,
+   PRs #220 e #222), e os outros copiam (§14).
+7. **Artefato gerado e versionado** (bundle que o deploy regenera) não se prova com a ferramenta: a
+   prova é a fonte identificada, a pasta de saída no `.gitignore`, a linha do workflow que regenera e,
+   no deploy do merge, o passo que consome o artefato encontrando-o. Existir não é executar: se executar
+   grava dado real, a prova para na existência e diz isso (`rotas` #309, 17/09/2026).
+8. **`docs/ORFAOS.md`, `docs/SANEAMENTO.md` e `docs/OTIMIZACAO.md` são registros só-acréscimo**, como o
+   `NUNCA-FAZER`: a propagação cria o esqueleto, e cada frente acrescenta a sua linha sem transferência
+   de claim.
 
 ### 17.2 Otimização
 
@@ -772,7 +874,12 @@ As duas coisas só existem medidas.
    o autovacuum, não a consulta.
 3. **Orçamento que só encolhe:** `otimizacao.json` declara o limite de cada medida; o gate do CI mede e
    reprova acima do limite. Baixar o limite depois de otimizar é obrigatório; subir o limite é decisão
-   do dono, registrada — nunca passo de laço.
+   do dono, registrada — nunca passo de laço. **A catraca de baixa só é estrita onde a medida roda no
+   PR.** Medida que só existe depois do build de produção (JS por rota, quando o PR não builda) roda no
+   deploy e, abaixo do limite, **avisa** (`AVISO orcamento: baixar teto para X`) sem barrar: reprovar ali
+   travaria a publicação de uma otimização já mergeada. Acima do limite, barra. Limite novo sem medida
+   no runner leva folga declarada (o `superadmin` usou 5%) até a variação ser medida. Referência:
+   `scripts/harness_otimizacao.py` (H-OTIM-01).
 4. **Cada otimização vai para `docs/OTIMIZACAO.md`**: a medida, o antes, o depois e o SHA.
 
 ---
